@@ -1,0 +1,86 @@
+@{
+    Layout = "~/Views/Shared/_RegisterLayout.cshtml";
+    ViewData["Title"] = "Register";
+}
+
+@model OnlineMarkerCW.ViewModels.RegisterViewModel
+
+@*
+<script src="~/Scripts/jquery.js"></script>
+<script src="~/Scripts/jquery.validate.js"></script>
+<script src="~/Scripts/jquery.validate.unobtrusive.js">
+</script>
+*@
+
+<h1>Register</h1>
+
+@using (Html.BeginForm("Register", "Account"))
+{
+  <div class="center-block"> @Html.LabelFor(model=> model.Email) </div>
+  <div class="center-block"> @Html.TextBoxFor(model => model.Email)</div>
+  <div class="center-block"> @Html.LabelFor(model=> model.Name)</div>
+  <div class="center-block"> @Html.TextBoxFor(model => model.Name)</div>
+  <div class="center-block"> @Html.LabelFor(model=> model.Surname)</div>
+  <div class="center-block"> @Html.TextBoxFor(model => model.Surname)</div>
+  <div class="center-block"> @Html.LabelFor(model=> model.Password)</div>
+  <div class="center-block"> @Html.PasswordFor(model => model.Password)</div>
+  <div class="center-block"> @Html.LabelFor(model=> model.ConfirmPassword)</div>
+  <div class="center-block"> @Html.PasswordFor(model => model.ConfirmPassword)</div>
+  <div class="center-block"> @Html.LabelFor(m => m.UserTypeID)</div>
+  <div class="center-block"> @Html.DropDownListFor(m => m.UserTypeID, new SelectList(Model.UserTypeList, "Value", "Text"), "Select User Type...")</div>
+  <div class="center-block">   <input type="submit" value="Register" /></div>
+  @Html.ValidationSummary()
+}
+
+@*
+@Html.LabelFor(model=> model.Email)
+@Html.TextBoxFor(model => model.Email)
+@Html.LabelFor(model=> model.Name)
+@Html.TextBoxFor(model => model.Name)
+@Html.LabelFor(model=> model.Surname)
+@Html.TextBoxFor(model => model.Surname)
+@Html.LabelFor(model=> model.Password)
+@Html.TextBoxFor(model => model.Password)
+@Html.LabelFor(model=> model.ConfirmPassword)
+@Html.TextBoxFor(model => model.ConfirmPassword)
+@Html.LabelFor(m => m.UserTypeID)
+@Html.DropDownListFor(m => m.UserTypeID, new SelectList(Model.UserTypeList, "Value", "Text"), "Select User Type...")
+@Html.ValidationMessageFor(m => m.UserTypeID)
+@*
+@*
+<form asp-controller="Account" asp-action="Register" method="post">
+    <table>
+        <tr>
+          <td><label asp-for="Email"></label></td>
+          <td><input asp-for="Email" /></td>
+        </tr>
+        <tr>
+            <td><label asp-for="Name"></label></td>
+            <td><input asp-for="Name" /></td>
+        </tr>
+        <tr>
+            <td><label asp-for="Surname"></label></td>
+            <td><input asp-for="Surname" /></td>
+        </tr>
+        <tr>
+            <td><label asp-for="Password"></label></td>
+            <td><input asp-for="Password" /></td>
+        </tr>
+        <tr>
+            <td><label asp-for="ConfirmPassword"></label></td>
+            <td><input asp-for="ConfirmPassword" /></td>
+        </tr>
+        <tr>
+
+        </tr>
+        <tr>
+
+        </tr>
+        <tr>
+            <td colspan="2"><input type="submit"
+             value="Register" /></td>
+        </tr>
+    </table>
+    <div asp-validation-summary="All" ></div>
+</form>
+*@

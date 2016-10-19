@@ -1,16 +1,22 @@
-﻿body {
-    padding-top: 50px;
-    padding-bottom: 20px;
+.wrapper, .sidebar {
+      background-color: #D3D3D3;
 }
-
 /* Wrapping element */
 /* Set some basic padding to keep content from hitting the edges */
 .body-content {
     padding-left: 15px;
     padding-right: 15px;
+    padding-top: 20px;
+    background-color: white;
+}
+
+/* removes margin from paragaphs*/
+p {
+  margin: 0 ;
 }
 
 /* Set widths on the form inputs since otherwise they're 100% wide */
+
 input,
 select,
 textarea {
@@ -28,6 +34,44 @@ textarea {
 {
     width: 100%;
 }
+
+footer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 40px;
+    background-color: gray;
+
+}
+
+.topbar {
+  background-color: #4D4D4D;
+  min-height: 50px;
+}
+
+nav img {
+  padding:20px;
+}
+
+/*For bigger screens only*/
+
+ @media(min-width:768px) {
+   .body-content {
+      margin-left: 260px;
+      min-height: 400px;
+   }
+
+   nav:not(.sidebar){
+      display: flex;
+     }
+
+  .sidebar {
+      z-index: 1;
+      position: absolute;
+      width: 260px;
+  }
+}
+
 
 /* Hide/rearrange for smaller screens */
 @media screen and (max-width: 767px) {

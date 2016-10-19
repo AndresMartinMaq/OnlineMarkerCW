@@ -4,9 +4,14 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using OnlineMarkerCW.Data;
+using OnlineMarkerCW.Models;
+
 
 namespace OnlineMarkerCW
 {
@@ -36,11 +41,56 @@ namespace OnlineMarkerCW
             // Add framework services.
             services.AddApplicationInsightsTelemetry(Configuration);
 
+            //add entity framework and sqlserverrerigester  the model context as a service, connect it to the the sql server
+            // Add framework services.
+
+          // services.AddDbContext<OnlineMarkerCWContext>(options =>
+          //     options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+
+          // services.AddDbContext<ApplicationDbContext>(options =>
+          //   options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+
+          //uncomment the previous two lines and comment these two for using MSSQL server rather then local sqlite DB
+          services.AddDbContext<OnlineMarkerCWContext>(options =>
+              options.UseSqlite(Configuration.GetConnectionString("SQLliteConnection")));
+
+            services.AddDbContext<ApplicationDbContext>(options =>
+                  options.UseSqlite(Configuration.GetConnectionString("SQLliteConnection")));
+
+
+          //add support for the indentiy service which provides authenicaiton
+          services.AddIdentity<ApplicationUser, ApplicationUserRole>()
+              .AddEntityFrameworkStores<ApplicationDbContext>()
+              .AddDefaultTokenProviders();
+
+            //indentiy service options
+            services.Configure<IdentityOptions>(options =>
+              {
+                  // Password settings
+                  options.Password.RequireDigit = true;
+                  options.Password.RequiredLength = 8;
+                  options.Password.RequireNonAlphanumeric = false;
+                  options.Password.RequireUppercase = true;
+                  options.Password.RequireLowercase = false;
+
+                  // Lockout settings
+                  options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(30);
+                  options.Lockout.MaxFailedAccessAttempts = 10;
+
+                  // Cookie settings
+                  options.Cookies.ApplicationCookie.ExpireTimeSpan = TimeSpan.FromDays(150);
+                  options.Cookies.ApplicationCookie.LoginPath = "/Account/LogIn";
+                  options.Cookies.ApplicationCookie.LogoutPath = "/Account/LogOff";
+
+                  // User settings
+                  options.User.RequireUniqueEmail = true;
+              });
+
             services.AddMvc();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory, OnlineMarkerCWContext context)
         {
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
@@ -61,12 +111,16 @@ namespace OnlineMarkerCW
 
             app.UseStaticFiles();
 
+            app.UseIdentity();
+
             app.UseMvc(routes =>
             {
                 routes.MapRoute(
                     name: "default",
                     template: "{controller=Home}/{action=Index}/{id?}");
             });
+            //init the db prepopulation
+            DbInitializer.Initialize(context);
         }
     }
 }
