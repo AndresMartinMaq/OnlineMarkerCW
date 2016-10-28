@@ -8,7 +8,7 @@ using OnlineMarkerCW.Data;
 namespace OnlineMarkerCW.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20161019141356_MyFirstMigration")]
+    [Migration("20161020170723_MyFirstMigration")]
     partial class MyFirstMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -178,6 +178,30 @@ namespace OnlineMarkerCW.Migrations
                     b.ToTable("AspNetRoles");
                 });
 
+            modelBuilder.Entity("OnlineMarkerCW.Models.Work", b =>
+                {
+                    b.Property<int>("WorkID")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<int>("Mark");
+
+                    b.Property<DateTime>("MarkDate");
+
+                    b.Property<string>("MarkerId");
+
+                    b.Property<string>("OwnerId");
+
+                    b.Property<DateTime>("SubmitDate");
+
+                    b.HasKey("WorkID");
+
+                    b.HasIndex("MarkerId");
+
+                    b.HasIndex("OwnerId");
+
+                    b.ToTable("Works");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.EntityFrameworkCore.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("OnlineMarkerCW.Models.ApplicationUserRole")
@@ -213,6 +237,17 @@ namespace OnlineMarkerCW.Migrations
                         .WithMany("Roles")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("OnlineMarkerCW.Models.Work", b =>
+                {
+                    b.HasOne("OnlineMarkerCW.Models.ApplicationUser", "Marker")
+                        .WithMany()
+                        .HasForeignKey("MarkerId");
+
+                    b.HasOne("OnlineMarkerCW.Models.ApplicationUser", "Owner")
+                        .WithMany()
+                        .HasForeignKey("OwnerId");
                 });
         }
     }

@@ -31,7 +31,7 @@
               <span class="icon-bar"></span>
               <span class="icon-bar"></span>
           </button>
-          <span class="navbar-brand "> Welcome to <a asp-area="" asp-controller="Home" asp-action="Index" >OnlineMarkerCW</a>, @ViewData["Name"] !</span>
+          <span class="navbar-brand "> Welcome to <a asp-area="" asp-controller="Home" asp-action="Index" >OnlineMarkerCW</a>, @ViewData["user_name"]!</span>
       </div>
   </nav>
 
@@ -39,9 +39,10 @@
     <nav class="navbar-default sidebar">
         <div class="sidebar-collapse">
             <ul class="nav">
-                <li> <img  src="img/quick-logo_min.png" class="user-image img-responsive" alt="Image of the user"/> </li>
-                <li><a asp-area="" asp-controller="Home" asp-action="Index">My Works</a></li>
-                <li><a asp-area="" asp-controller="Home" asp-action="Index">About</a></li>
+                <li> <img  src="~/img/quick-logo_min.png" class="user-image img-responsive" alt="The OnlineMarker Logo"/> </li>
+
+                <li>@Html.ActionLink("My Works", "MyWorks", "Home")</li>
+                <li>@Html.ActionLink("About", "About", "Home")</li>
                 <li>
                     <form asp-controller="Account" asp-action="Logout" method="post">
                       <input type="submit" value="Logout">
