@@ -136,40 +136,40 @@ namespace OnlineMarkerCW.Controllers
 
         //helper functions
         private void AddErrors(IdentityResult result)
+        {
+            foreach (var error in result.Errors)
             {
-                foreach (var error in result.Errors)
-                {
-                    ModelState.AddModelError(string.Empty, error.Description);
-                }
+                ModelState.AddModelError(string.Empty, error.Description);
             }
+        }
 
-            private async Task<ApplicationUser> GetCurrentUserAsync()
-            {
-                return await _userManager.FindByIdAsync(_userManager.GetUserId(User));
-            }
+        private async Task<ApplicationUser> GetCurrentUserAsync()
+        {
+            return await _userManager.FindByIdAsync(_userManager.GetUserId(User));
+        }
 
-            private IActionResult RedirectToLocal(string returnUrl)
+        private IActionResult RedirectToLocal(string returnUrl)
+        {
+            if (Url.IsLocalUrl(returnUrl))
             {
-                if (Url.IsLocalUrl(returnUrl))
-                {
-                    return Redirect(returnUrl);
-                }
-                else
-                {
-                    return RedirectToAction(nameof(HomeController.Index), "Home");
-                }
+                return Redirect(returnUrl);
             }
-            /*
-            private List<SelectListItem> createUserTypeList()
+            else
             {
-                List<SelectListItem> list = new List<SelectListItem>();
-                //populate the model wtih list of  available role enums
-                list.Add(new SelectListItem() { Value = "Student", Text = "Student" });
-                list.Add(new SelectListItem() { Value = "Teacher", Text = "Teacher" });
-                return list;
+                return RedirectToAction(nameof(HomeController.Index), "Home");
+            }
+        }
+        /*
+        private List<SelectListItem> createUserTypeList()
+        {
+            List<SelectListItem> list = new List<SelectListItem>();
+            //populate the model wtih list of  available role enums
+            list.Add(new SelectListItem() { Value = "Student", Text = "Student" });
+            list.Add(new SelectListItem() { Value = "Teacher", Text = "Teacher" });
+            return list;
 
-            }
-            */
+        }
+        */
 
     }
 }

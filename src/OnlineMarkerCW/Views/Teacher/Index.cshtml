@@ -1,0 +1,38 @@
+﻿
+@{
+    Layout = "~/Views/Shared/_RegisterLayout.cshtml";
+}
+
+@model OnlineMarkerCW.Models.Work[]
+
+<div class="row">
+    <div class="col-md-12">
+        <h1>John Doe - Teacher</h1>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-5">
+        <h2>My Students</h2>
+    </div>
+    <div class="col-md-5">
+        <h2>Submissions</h2>
+    </div>
+    <div class="col-md-1">
+        <h2>Grades</h2>
+    </div>
+</div>
+<br>
+<br>
+@foreach (var work in Model){
+    <div class="row">
+        <div class="col-md-5">
+            <p>@work.Owner.Name @work.Owner.Surname</p>
+        </div>
+        <div class="col-md-5">
+            <a href="/Teacher/Work/@work.WorkID/">Work with ID: @work.WorkID</a>
+        </div>
+        <div class="col-md-1">
+            <p>@work.Mark</p>
+        </div>
+    </div>
+}
