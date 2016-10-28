@@ -12,9 +12,11 @@
 <script src="~/Scripts/jquery.validate.unobtrusive.js">
 </script>*@
 
-<h1>Login</h1>
+
 @using (Html.BeginForm("Login", "Account"))
 {
+   @Html.AntiForgeryToken() @*orivude token for anti cross site cookie forger*@
+   <h1>Login</h1>
     @Html.EditorForModel();
     <input type="submit" value="Login" />
     <br></br>

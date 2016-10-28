@@ -8,7 +8,7 @@ namespace OnlineMarkerCW.Models
 {
     public static class DbInitializer
     {
-        public static void Initialize(OnlineMarkerCWContext context)
+        public static void Initialize(ApplicationDbContext context)
         {
             //context.Database.EnsureCreated();
 /*
@@ -36,30 +36,34 @@ namespace OnlineMarkerCW.Models
             }
             context.SaveChanges();
 
-
+*/
 
             var works = new Work[]
             {
                 new Work { Mark = 32,
                     SubmitDate = DateTime.Parse("2007-09-01"),
                     MarkDate = DateTime.Parse("2007-09-02"),
-                    Owner  = users.Single( i => i.Surname == "Norman"),
-                    Marker  = users.Single( i => i.Surname == "Olivetto") },
+                    //Owner  = users.Single( i => i.Surname == "Norman"),
+                    //Marker  = users.Single( i => i.Surname == "Olivetto")
+                     },
                 new Work { Mark = 100,
                     SubmitDate = DateTime.Parse("2007-09-01"),
                     MarkDate = DateTime.Parse("2007-09-02"),
-                    Owner  = users.Single( i => i.Surname == "Li"),
-                    Marker  = users.Single( i => i.Surname == "Olivetto") },
+                    //Owner  = users.Single( i => i.Surname == "Li"),
+                    //Marker  = users.Single( i => i.Surname == "Olivetto")
+                     },
                 new Work { Mark = 35,
                     SubmitDate = DateTime.Parse("2007-09-01"),
                     MarkDate = DateTime.Parse("2007-09-02"),
-                    Owner  = users.Single( i => i.Surname == "Anand"),
-                    Marker  = users.Single( i => i.Surname == "Justice") },
+                    //Owner  = users.Single( i => i.Surname == "Anand"),
+                    //Marker  = users.Single( i => i.Surname == "Justice")
+                     },
                 new Work { Mark = 10,
                     SubmitDate = DateTime.Parse("2007-09-01"),
                     MarkDate = DateTime.Parse("2007-09-02"),
-                    Owner  = users.Single( i => i.Surname == "Alonso"),
-                    Marker  = users.Single( i => i.Surname == "Alexander") }
+                    //Owner  = users.Single( i => i.Surname == "Alonso"),
+                    //Marker  = users.Single( i => i.Surname == "Alexander")
+                   }
             };
 
             foreach (Work w in works)
@@ -67,7 +71,7 @@ namespace OnlineMarkerCW.Models
                 context.Works.Add(w);
             }
             context.SaveChanges();
-*/
+
 
         }
     }

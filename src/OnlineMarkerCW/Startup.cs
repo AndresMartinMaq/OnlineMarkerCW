@@ -44,6 +44,7 @@ namespace OnlineMarkerCW
             //add entity framework and sqlserverrerigester  the model context as a service, connect it to the the sql server
             // Add framework services.
 
+          //UPDATE - OnlineMarkerCWContext are not necessary any more, as one context for all models have been merged into ApplicationDbContext
           // services.AddDbContext<OnlineMarkerCWContext>(options =>
           //     options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
@@ -51,8 +52,10 @@ namespace OnlineMarkerCW
           //   options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
           //uncomment the previous two lines and comment these two for using MSSQL server rather then local sqlite DB
-          services.AddDbContext<OnlineMarkerCWContext>(options =>
-              options.UseSqlite(Configuration.GetConnectionString("SQLliteConnection")));
+
+          //UPDATE - OnlineMarkerCWContext are not necessary any more, as one context for all models have been merged into ApplicationDbContext
+          //services.AddDbContext<OnlineMarkerCWContext>(options =>
+          //    options.UseSqlite(Configuration.GetConnectionString("SQLliteConnection")));
 
             services.AddDbContext<ApplicationDbContext>(options =>
                   options.UseSqlite(Configuration.GetConnectionString("SQLliteConnection")));
@@ -79,18 +82,24 @@ namespace OnlineMarkerCW
 
                   // Cookie settings
                   options.Cookies.ApplicationCookie.ExpireTimeSpan = TimeSpan.FromDays(150);
-                  options.Cookies.ApplicationCookie.LoginPath = "/Account/LogIn";
-                  options.Cookies.ApplicationCookie.LogoutPath = "/Account/LogOff";
+                  options.Cookies.ApplicationCookie.LoginPath = "/Account/Login";
+                  options.Cookies.ApplicationCookie.LogoutPath = "/Account/Logout";
 
                   // User settings
                   options.User.RequireUniqueEmail = true;
               });
 
+              //configure session
+              services.AddMemoryCache();
+              services.AddSession(options => {
+                      options.IdleTimeout = TimeSpan.FromDays(1);
+                      options.CookieName = ".app_session";
+              });
             services.AddMvc();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory, OnlineMarkerCWContext context)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory, ApplicationDbContext context)
         {
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
@@ -113,6 +122,8 @@ namespace OnlineMarkerCW
 
             app.UseIdentity();
 
+            app.UseSession();
+
             app.UseMvc(routes =>
             {
                 routes.MapRoute(
@@ -120,7 +131,7 @@ namespace OnlineMarkerCW
                     template: "{controller=Home}/{action=Index}/{id?}");
             });
             //init the db prepopulation
-            DbInitializer.Initialize(context);
+            //DbInitializer.Initialize(context);
         }
     }
 }

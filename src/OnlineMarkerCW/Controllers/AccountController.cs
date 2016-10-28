@@ -8,9 +8,11 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using OnlineMarkerCW.Models;
 using OnlineMarkerCW.ViewModels;
+
 
 namespace OnlineMarkerCW.Controllers
 {
@@ -66,7 +68,7 @@ namespace OnlineMarkerCW.Controllers
                 user.Name = model.Name;
                 user.Surname = model.Surname;
 
-                var result = await _userManager.CreateAsync(user, model.Password); //await in asyn mode for create a user
+                var result = await _userManager.CreateAsync(user, model.Password); //await in asyn mode for # a user
                 if (result.Succeeded) //if registration succeeded, singin the user and redirect home
                 {
                   string userType;
@@ -85,9 +87,21 @@ namespace OnlineMarkerCW.Controllers
                             return View(model);
                           }
                       }
+                    //log things into session
+                    /*HttpContext.Session.SetString("email", model.Email);
+                    HttpContext.Session.SetString("name",  model.Name);
+                    HttpContext.Session.SetString("surname", model.Surname);
+                    HttpContext.Session.SetString("role", userType);*/
+                    //store claims
+                    await _userManager.AddClaimAsync(user, new Claim(ClaimTypes.Email, model.Email));
+                    await _userManager.AddClaimAsync(user, new Claim("Name",  model.Name));
+                    await _userManager.AddClaimAsync(user, new Claim(ClaimTypes.Surname, model.Surname));
+                    await _userManager.AddClaimAsync(user, new Claim(ClaimTypes.Role, userType));
+
                     await _userManager.AddToRoleAsync(user,userType); //add the user to the role
                     await _signInManager.SignInAsync(user, isPersistent: false); //sing in the user
                     _logger.LogInformation(3, "User created a new account with password.");
+
                     return RedirectToAction(nameof(HomeController.Index), "Home"); //redirect to home page
                 }
                 AddErrors(result);
@@ -110,7 +124,8 @@ namespace OnlineMarkerCW.Controllers
                 var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: false);
                 if (result.Succeeded)
                 {
-                    _logger.LogInformation(1, "User logged in.");
+                    //dont use session, use claims, claims store the information under the cookie rather than database, hence work as same way as session
+                    _logger.LogInformation(1, "User logged in and stulst is {result}", result);
                     return RedirectToLocal(returnUrl);
                 }
                 else
@@ -131,8 +146,18 @@ namespace OnlineMarkerCW.Controllers
         {
             await _signInManager.SignOutAsync();
             _logger.LogInformation(4, "User logged out.");
+            //HttpContext.Session.Abandon();
             return RedirectToAction(nameof(HomeController.Index), "Home");
         }
+
+        //GET: /Account/AccessDenied
+        public IActionResult AccessDenied() {
+          ViewData["Message"] = "You are not allowed to access this page, please try another one.";
+          ViewData["Tittle"] = "Access Denied";
+          return View("Message_or_error");
+        }
+
+
 
         //helper functions
         private void AddErrors(IdentityResult result)

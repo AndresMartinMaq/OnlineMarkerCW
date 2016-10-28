@@ -106,6 +106,35 @@ namespace OnlineMarkerCW.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Works",
+                columns: table => new
+                {
+                    WorkID = table.Column<int>(nullable: false)
+                        .Annotation("Autoincrement", true),
+                    Mark = table.Column<int>(nullable: false),
+                    MarkDate = table.Column<DateTime>(nullable: false),
+                    MarkerId = table.Column<string>(nullable: true),
+                    OwnerId = table.Column<string>(nullable: true),
+                    SubmitDate = table.Column<DateTime>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Works", x => x.WorkID);
+                    table.ForeignKey(
+                        name: "FK_Works_AspNetUsers_MarkerId",
+                        column: x => x.MarkerId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Works_AspNetUsers_OwnerId",
+                        column: x => x.OwnerId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "AspNetRoleClaims",
                 columns: table => new
                 {
@@ -190,6 +219,16 @@ namespace OnlineMarkerCW.Migrations
                 name: "RoleNameIndex",
                 table: "AspNetRoles",
                 column: "NormalizedName");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Works_MarkerId",
+                table: "Works",
+                column: "MarkerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Works_OwnerId",
+                table: "Works",
+                column: "OwnerId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -208,6 +247,9 @@ namespace OnlineMarkerCW.Migrations
 
             migrationBuilder.DropTable(
                 name: "AspNetUserTokens");
+
+            migrationBuilder.DropTable(
+                name: "Works");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");

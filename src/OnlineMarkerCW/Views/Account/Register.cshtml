@@ -12,10 +12,12 @@
 </script>
 *@
 
-<h1>Register</h1>
+
 
 @using (Html.BeginForm("Register", "Account"))
 {
+  @Html.AntiForgeryToken() @*orivude token for anti cross site cookie forger*@
+  <h1>Register</h1>
   <div class="center-block"> @Html.LabelFor(model=> model.Email) </div>
   <div class="center-block"> @Html.TextBoxFor(model => model.Email)</div>
   <div class="center-block"> @Html.LabelFor(model=> model.Name)</div>
