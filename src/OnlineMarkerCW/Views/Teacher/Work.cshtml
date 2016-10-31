@@ -16,8 +16,31 @@
         <h2>Coursework Source Code</h2>
         <!-- If the model has just the file name: Html.Raw(File.ReadAllText(Server.MapPath(<htmlpath>))) -->
         <!-- Assuming we have the string of html, include the variable inside the thing below.-->
-        <pre><code>
-            @Html.Raw(Html.Encode("<h2>This is an example HTML coursework as if made by a student to be marked.</h2>"));
-        </code></pre>
+        <div style="overflow-y: scroll; height:500px;">
+            <pre><code>
+                @Html.Raw(Html.Encode("<h2>This is an example HTML coursework as if made by a student to be marked.</h2>"));
+            </code></pre>
+        </div>
     </div>
+</div>
+<br>
+<br>
+<div class="row">
+
+@using (Html.BeginForm("Work", "Teacher", FormMethod.Post, new { id = "gradingForm" }))
+{
+    <div class="col-md-4">
+        <label>Select Grade</label>
+        <br>
+        <input form="gradingForm" type="number" name="mark" min="0" max="100">
+    </div>
+    <div class="col-md-8"> 
+        @Html.AntiForgeryToken()
+        <label>Provide Feedback</label>
+        <textarea class="larger" form="gradingForm" name="feedback" rows="8"></textarea>
+        <br>
+        <input type="submit" value="Sumbit Marking">
+        @Html.ValidationSummary()
+    </div>
+}
 </div>

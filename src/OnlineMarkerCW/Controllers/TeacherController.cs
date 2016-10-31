@@ -40,5 +40,13 @@ namespace OnlineMarkerCW.Controllers
             };
             return View(testWorks[id]);
         }
+        // POST: /Teacher/Work/{id:int}
+        //[Authorize]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Work(int id, String feedback, String mark)
+        {
+            return null;//TODO 
+        }
     }
 }
