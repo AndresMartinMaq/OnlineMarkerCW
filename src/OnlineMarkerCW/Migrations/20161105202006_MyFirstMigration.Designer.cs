@@ -8,7 +8,7 @@ using OnlineMarkerCW.Data;
 namespace OnlineMarkerCW.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20161020170723_MyFirstMigration")]
+    [Migration("20161105202006_MyFirstMigration")]
     partial class MyFirstMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -120,7 +120,8 @@ namespace OnlineMarkerCW.Migrations
 
                     b.Property<DateTimeOffset?>("LockoutEnd");
 
-                    b.Property<string>("Name");
+                    b.Property<string>("Name")
+                        .IsRequired();
 
                     b.Property<string>("NormalizedEmail")
                         .HasAnnotation("MaxLength", 256);
@@ -136,7 +137,8 @@ namespace OnlineMarkerCW.Migrations
 
                     b.Property<string>("SecurityStamp");
 
-                    b.Property<string>("Surname");
+                    b.Property<string>("Surname")
+                        .IsRequired();
 
                     b.Property<bool>("TwoFactorEnabled");
 
@@ -182,6 +184,10 @@ namespace OnlineMarkerCW.Migrations
                 {
                     b.Property<int>("WorkID")
                         .ValueGeneratedOnAdd();
+
+                    b.Property<string>("Feedback");
+
+                    b.Property<string>("FilePath");
 
                     b.Property<int>("Mark");
 

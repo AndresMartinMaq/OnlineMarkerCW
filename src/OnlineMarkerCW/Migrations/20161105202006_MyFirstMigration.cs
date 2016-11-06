@@ -33,14 +33,14 @@ namespace OnlineMarkerCW.Migrations
                     EmailConfirmed = table.Column<bool>(nullable: false),
                     LockoutEnabled = table.Column<bool>(nullable: false),
                     LockoutEnd = table.Column<DateTimeOffset>(nullable: true),
-                    Name = table.Column<string>(nullable: true),
+                    Name = table.Column<string>(nullable: false),
                     NormalizedEmail = table.Column<string>(maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(maxLength: 256, nullable: true),
                     PasswordHash = table.Column<string>(nullable: true),
                     PhoneNumber = table.Column<string>(nullable: true),
                     PhoneNumberConfirmed = table.Column<bool>(nullable: false),
                     SecurityStamp = table.Column<string>(nullable: true),
-                    Surname = table.Column<string>(nullable: true),
+                    Surname = table.Column<string>(nullable: false),
                     TwoFactorEnabled = table.Column<bool>(nullable: false),
                     UserName = table.Column<string>(maxLength: 256, nullable: true)
                 },
@@ -111,6 +111,8 @@ namespace OnlineMarkerCW.Migrations
                 {
                     WorkID = table.Column<int>(nullable: false)
                         .Annotation("Autoincrement", true),
+                    Feedback = table.Column<string>(nullable: true),
+                    FilePath = table.Column<string>(nullable: true),
                     Mark = table.Column<int>(nullable: false),
                     MarkDate = table.Column<DateTime>(nullable: false),
                     MarkerId = table.Column<string>(nullable: true),

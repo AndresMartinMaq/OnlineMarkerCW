@@ -1,0 +1,106 @@
+@model OnlineMarkerCW.Models.Work
+
+@section header {
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.7.0/styles/default.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.7.0/highlight.min.js"></script>
+}
+
+@{
+    ViewData["Title"] = "Submission" + @Model.FileName;
+    var file_content = System.IO.File.ReadAllLines(@Model.FilePath);
+}
+
+<h2> <a id="src_code_button">html source code </a> | <a id="html_render_button"> html render result </a> </h2>
+
+<form method="post" asp-action="WorkDelete" asp-controller="Home" asp-route-id="@Model.WorkID">
+    <input type="submit" value="Delete this upload" />
+</form>
+
+<div class="view-container-src">
+  <pre><code class="html">
+
+    @foreach (var  file_line in @file_content) {
+      @Html.Raw(@Html.Encode(@file_line));
+      @Html.Raw("\n")
+    }
+  </code></pre>
+</div>
+<div class="view-container-render">
+
+@*there is a bug in chrome on linux, which makes the scrollbars in iframes dissapear after their display property from none to block has been toggled - there are two solution to this:
+      - either have a parent iframe and then when page loads inject a child iframe with the source into it with JS and toggle display of the parent iframe.
+      -re-inject a new  iframe element each time which makes page lage a little bit
+      -or refresh the iframe once it becomes visible with some JS, which makes the page to lag a little bit.
+      ***ive tried everying, looks lik the best solution is to reload the frame source***
+      - *@
+
+    <iframe   class="frame" width="100%" height="800px" data-srcdoc=
+
+    "
+    @foreach (var  file_line in @file_content) {
+      @Html.Raw(@Html.Encode(@file_line))
+    } "
+    >
+
+      </iframe>
+
+
+</div>
+@section scripts {
+  @*init the highlither for the html syntax*@
+  <script>hljs.initHighlightingOnLoad();</script>
+
+  @*bind and init the event listeerns for tab clicking and chanching the corresponding views to swtich between the source code and the rendered restult for the html*@
+  <script>
+  (function ($) {
+      "use strict";
+      //create a module for tab switching
+      var myWorkscript = {
+
+          main_fun: function () {
+              //show and hide is used and binded to the approporiate tab links, as toggle would make the same link to toggle the views and not to keep the display state.
+              $("#src_code_button").bind("click", function () {
+                $(".view-container-src").show();
+                $(".view-container-render").hide();
+                $( '.frame' ).attr( 'srcdoc', ' ');
+                //reload the frame so that scrollbar reapears, as there is a bug in chrome which hides it away.
+                //$(".view-container-render").append(iframe_elem);
+
+                });
+
+              $("#html_render_button").bind("click", function () {
+
+                $(".view-container-src").hide();
+                $( '.frame' ).attr( 'srcdoc', function () { return $( this ).attr('data-srcdoc'); });
+                $(".view-container-render").show();
+
+
+              });
+          },
+
+          gen_Iframe: function() {
+             var iframe_child = $('<iframe>');
+             var iframe_srcdoc =  $('#hidden-frame-data').attr('data-srcdoc');
+             //" @foreach (var  file_line in @file_content) {@Html.Raw(@Html.Encode(@file_line))} "
+              iframe_child.attr('srcdoc', iframe_srcdoc);
+              iframe_child.attr('id', '#child-frame');
+              return iframe_child;
+
+
+          },
+
+            //init the the event binding to the links
+
+              init: function () {
+                myWorkscript.main_fun();
+
+              }
+          }
+          //launch the app
+              $(document).ready(function () {
+                  myWorkscript.init();
+              });
+
+  }(jQuery));
+  </script>
+}

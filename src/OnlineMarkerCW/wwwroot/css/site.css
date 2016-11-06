@@ -1,3 +1,6 @@
+body {
+  overflow:scroll;
+}
 .wrapper, .sidebar {
       background-color: #D3D3D3;
 }
@@ -14,6 +17,44 @@
 /* removes margin from paragaphs*/
 p {
   margin: 0 ;
+}
+
+pre {
+  margin: 0;
+  padding: 0;
+  border-radius: 0px;
+}
+
+code {
+  max-height : 800px;
+  width: 100%;
+  overflow-x: scroll !important;
+  overflow-y: scroll;
+
+}
+
+.view-container-render {
+  display:none;
+  max-height : 800px;
+  width: 100%;
+}
+
+.generic-error {
+  color: red;
+}
+
+.generic-message{
+ color: green;  
+}
+
+iframe {
+  border: 1px solid #ccc;
+  margin: 0;
+  padding: 0;
+  border-radius: 0px;
+  overflow-x: scroll;
+  overflow-y: scroll;
+
 }
 
 /* Set widths on the form inputs since otherwise they're 100% wide */
@@ -53,7 +94,6 @@ footer {
 nav img {
   padding:20px;
 }
-
 /*For bigger screens only*/
 
  @media(min-width:768px) {

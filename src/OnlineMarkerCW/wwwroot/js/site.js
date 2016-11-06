@@ -18,14 +18,14 @@
             });
         },
           //init the the event binding to the window
-            initialization: function () {
+            init: function () {
               mainApp.main_fun();
 
             }
         }
         //launch the app
             $(document).ready(function () {
-                mainApp.main_fun();
+                mainApp.init();
             });
 
 }(jQuery));
