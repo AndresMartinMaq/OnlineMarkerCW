@@ -126,7 +126,7 @@ namespace OnlineMarkerCW.Controllers
                 {
                     //dont use session, use claims, claims store the information under the cookie rather than database, hence work as same way as session
                     _logger.LogInformation(1, "User logged in and stulst is {result}", result);
-                    return RedirectToLocal(returnUrl);
+                    return RedirectToAction(nameof(HomeController.Index), "Home");
                 }
                 else
                 {
@@ -150,16 +150,8 @@ namespace OnlineMarkerCW.Controllers
             return RedirectToAction(nameof(HomeController.Index), "Home");
         }
 
-        //GET: /Account/AccessDenied
-        public IActionResult AccessDenied() {
-          ViewData["Message"] = "You are not allowed to access this page, please try another one.";
-          ViewData["Tittle"] = "Access Denied";
-          return View("Message_or_error");
-        }
-
-
-
         //helper functions
+        //add errors for the vallidation error summaary
         private void AddErrors(IdentityResult result)
         {
             foreach (var error in result.Errors)
@@ -168,33 +160,7 @@ namespace OnlineMarkerCW.Controllers
             }
         }
 
-        private async Task<ApplicationUser> GetCurrentUserAsync()
-        {
-            return await _userManager.FindByIdAsync(_userManager.GetUserId(User));
-        }
 
-        private IActionResult RedirectToLocal(string returnUrl)
-        {
-            if (Url.IsLocalUrl(returnUrl))
-            {
-                return Redirect(returnUrl);
-            }
-            else
-            {
-                return RedirectToAction(nameof(HomeController.Index), "Home");
-            }
-        }
-        /*
-        private List<SelectListItem> createUserTypeList()
-        {
-            List<SelectListItem> list = new List<SelectListItem>();
-            //populate the model wtih list of  available role enums
-            list.Add(new SelectListItem() { Value = "Student", Text = "Student" });
-            list.Add(new SelectListItem() { Value = "Teacher", Text = "Teacher" });
-            return list;
-
-        }
-        */
 
     }
 }

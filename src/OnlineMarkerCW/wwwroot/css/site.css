@@ -1,8 +1,16 @@
-body {
-  overflow:scroll;
+/*font face for the log*/
+@font-face {
+  font-family: galanogrotesqued;
+  src:   url(/fonts/fonts/galano_grotesque_bold/Webfonts/galanogrotesquedemo_bold_macroman/galanogrotesquedemo-bold-webfont.woff);
+
 }
+
+body {
+  font-family:  "Helvetica Neue", Helvetica, Arial, sans-serif  ;
+}
+
 .wrapper, .sidebar {
-      background-color: #D3D3D3;
+      background-color: #E5E5E5;
 }
 /* Wrapping element */
 /* Set some basic padding to keep content from hitting the edges */
@@ -10,8 +18,18 @@ body {
     padding-left: 15px;
     padding-right: 15px;
     padding-top: 20px;
+    padding-bottom: 20px;
     background-color: white;
     min-height: 400px;
+}
+
+.login-content {
+  max-width:300px;
+  padding-bottom:20px;
+  margin:auto !important;
+}
+
+.wrapper {
 }
 
 /* removes margin from paragaphs*/
@@ -44,7 +62,28 @@ code {
 }
 
 .generic-message{
- color: green;  
+ color: green;
+}
+
+nav.topbar span.logo {
+  box-sizing:border-box;
+  display:block;
+  float:left;
+  font-size:18px;
+  height:50px;
+  line-height:20px;
+  padding-bottom:15px;
+  padding-left:15px;
+  padding-right:15px;
+  padding-top:15px;
+  font-family: galanogrotesqued;
+  font-weight: bold;
+  color: #B4D66C
+}
+
+nav.topbar a, nav.topbar a:hover, nav.topbar a:link, nav.topbar a:active, nav.topbar a:visited {
+  text-decoration: none;
+  color:rgb(255,255,255);
 }
 
 iframe {
@@ -103,17 +142,124 @@ footer {
 nav img {
   padding:20px;
 }
+
+nav:not(.sidebar){
+   display: flex;
+  }
+
+input[type*=text], input[type*=password], input[type*=text], input[type*=email], select {
+  min-width: 100%
+}
+
+select {
+  min-height: 26px;
+}
+
+
+input[type*=submit]:hover {
+  background-color: #cbe592;
+}
+
+input[type*=submit] {
+  /*color: #B4D66C;*/
+  border-radius: 2px 2px 2px 2px;
+  -moz-border-radius: 2px 2px 2px 2px;
+  -webkit-border-radius: 2px 2px 2px 2px;
+  border: 0px solid #0d0b0d;
+  background-color: #B4D66C;
+  width: 100%;
+  height: 35px;
+  margin-top:10px;
+}
+
+input[type*=submit].red {
+  background-color: #d9534f;
+  color: white;
+  font-weight: bold;
+}
+input[type*=submit].red:hover {
+  background-color: #ec7070;
+  color: white;
+  font-weight: bold;
+}
+
+
+input[type*=submit].reg{
+  min-width: 100% !important;
+}
+
+input[type*=submit].logout:hover{
+  background-color: #fff;
+
+}
+input[type*=submit].logout{
+  background-color:rgba(0, 0, 0, 0);
+  box-sizing:border-box;
+  color:rgb(51, 122, 183);
+  display:block;
+  font-size:14px;
+  height:40px;
+  margin-top:0px;
+  line-height:40px;
+  list-style-image:none;
+  list-style-position:outside;
+  list-style-type:none;
+  padding-bottom:10px;
+  padding-left:15px;
+  padding-right:15px;
+  padding-top:10px;
+  position:relative;
+  text-align:left;
+  text-decoration:none;
+  min-height: 60px;
+}
+
+div.submissions_list {
+  margin-top: 20px;
+  min-height: 400px;
+  padding-left: 5px;
+  border: 1px solid #e3e3e3;
+  border-radius: 4px;
+}
+
+div.submissions_list > p {
+  font-weight: bold;
+  padding-left: 14px;
+}
+
+div.submissions_list > ol {
+  padding-left: 15px;
+}
+
+.sidebar-collapse > .nav > li {
+  border-bottom: 1px solid rgba(107, 108, 109, 0.19);
+}
+
+.sidebar-collapse > .nav > li > a {
+  min-height: 60px;
+  line-height: 40px;
+}
+h3.render_switch_btn > a {
+  cursor: pointer;
+}
+
+h3 {
+  color: #888888;
+}
+
 /*For bigger screens only*/
 
  @media(min-width:768px) {
    .body-content {
       margin-left: 260px;
-      min-height: 400px;
+      min-height: 700px;
    }
 
-   nav:not(.sidebar){
-      display: flex;
-     }
+   .login-content {
+     min-width: 500px;
+     padding-left: 100px;
+     padding-right: 100px;
+   }
 
   .sidebar {
       z-index: 1;
@@ -121,12 +267,20 @@ nav img {
       width: 260px;
   }
 }
+/*for mobile phone screens*/
+@media(max-width: 460px) {
 
-
-/* Hide/rearrange for smaller screens */
-@media screen and (max-width: 767px) {
-  /* Hide captions */
-  .carousel-caption {
-    display: none
+  #src_code_button::after {
+    content:"\a";
+    white-space: pre;
   }
+  .render_switch_btn::before {
+    content:"|";
+  }
+
+  nav.topbar span.logo {
+    max-width: 80%;
+    min-height: 60px;
+  }
+
 }

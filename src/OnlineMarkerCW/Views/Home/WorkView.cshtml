@@ -6,15 +6,18 @@
 }
 
 @{
-    ViewData["Title"] = "Submission" + @Model.FileName;
+    ViewData["Title"] = "Submission " + @Model.FileName;
     var file_content = System.IO.File.ReadAllLines(@Model.FilePath);
 }
 
-<h2> <a id="src_code_button">html source code </a> | <a id="html_render_button"> html render result </a> </h2>
+<h1>Viewing @Model.FileName</h1>
+  <form method="post" asp-action="WorkDelete" asp-controller="Home" asp-route-id="@Model.WorkID">
+      <input type="submit" class="red" value="Delete this upload" />
+  </form>
 
-<form method="post" asp-action="WorkDelete" asp-controller="Home" asp-route-id="@Model.WorkID">
-    <input type="submit" value="Delete this upload" />
-</form>
+<h3 class="render_switch_btn"> <a id="src_code_button">html source code </a> | <a id="html_render_button"> html render result </a> </h3>
+
+
 
 <div class="view-container-src">
   <pre><code class="html">

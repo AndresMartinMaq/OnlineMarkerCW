@@ -37,7 +37,6 @@ namespace OnlineMarkerCW.Controllers
       //if overriden, this method will be called for every action method in the class
       public override void OnActionExecuting(ActionExecutingContext filterContext)
       {
-        base.OnActionExecuting(filterContext);
           //store claim values in view data. Claims dont access the DB, but rather the indenity model
           user_ID                  = this.User.FindFirstValue(ClaimTypes.NameIdentifier);
           ViewData["user_id"]      = user_ID;
@@ -46,6 +45,7 @@ namespace OnlineMarkerCW.Controllers
           ViewData["user_surname"] = this.User.FindFirstValue(ClaimTypes.Surname);
           user_role                = this.User.FindFirstValue(ClaimTypes.Role);
           ViewData["user_role"]    = user_role;
+          base.OnActionExecuting(filterContext);
       }
 
 
@@ -71,14 +71,15 @@ namespace OnlineMarkerCW.Controllers
 
           if(user_role == "Teacher")
           {
-              ViewData["Welcome-Message"] = "you're an almighty teacher.";
+              return RedirectToAction(nameof(HomeController.MyMarkings), "Home");
           }
 
           if(user_role == "Student")
           {
-              ViewData["Welcome-Message"] = "You're a bloody student, aren't ya.";
+              return RedirectToAction(nameof(HomeController.MyWorks), "Home");
           }
           return View();
+
       }
 
       [HttpGet]
@@ -161,10 +162,17 @@ namespace OnlineMarkerCW.Controllers
         if (work?.Owner == user || user_role == "Teacher") {
            return View(work);
         } else {
-          return RedirectToAction(nameof(AccountController.AccessDenied), "Account");
+          return RedirectToAction(nameof(HomeController.AccessDenied), "Home");
         }
 
       }
+
+      [Authorize(Roles = "Teacher")]
+      [HttpGet]
+      public IActionResult MyMarkings()  {
+        return View();
+      }
+
 
         [Authorize]
         [HttpGet]
@@ -183,6 +191,13 @@ namespace OnlineMarkerCW.Controllers
           {
                return await _context.Works.Where(w => w.Owner == Owner).OrderBy(w => w.SubmitDate).ToListAsync();
 
+          }
+
+          //GET: /Home/AccessDenied
+          public IActionResult AccessDenied() {
+            ViewData["Message"] = "You are not allowed to access this page, please try another one.";
+            ViewData["Tittle"] = "Access Denied";
+            return View("Message_or_error");
           }
     }
 }

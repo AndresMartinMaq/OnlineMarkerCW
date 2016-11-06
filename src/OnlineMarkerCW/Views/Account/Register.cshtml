@@ -5,85 +5,20 @@
 
 @model OnlineMarkerCW.ViewModels.RegisterViewModel
 
-@*
-<script src="~/Scripts/jquery.js"></script>
-<script src="~/Scripts/jquery.validate.js"></script>
-<script src="~/Scripts/jquery.validate.unobtrusive.js">
-</script>
-*@
-
-
-
-@using (Html.BeginForm("Register", "Account"))
-{
-  @*//Rihards FIXME, change from the hmtl helpers to tag helper.*@
-  @Html.AntiForgeryToken() @*orivude token for anti cross site cookie forger*@
-  <h1>Register</h1>
-  <div class="center-block"> @Html.LabelFor(model=> model.Email) </div>
-  <div class="center-block"> @Html.TextBoxFor(model => model.Email)</div>
-  <div class="center-block"> @Html.LabelFor(model=> model.Name)</div>
-  <div class="center-block"> @Html.TextBoxFor(model => model.Name)</div>
-  <div class="center-block"> @Html.LabelFor(model=> model.Surname)</div>
-  <div class="center-block"> @Html.TextBoxFor(model => model.Surname)</div>
-  <div class="center-block"> @Html.LabelFor(model=> model.Password)</div>
-  <div class="center-block"> @Html.PasswordFor(model => model.Password)</div>
-  <div class="center-block"> @Html.LabelFor(model=> model.ConfirmPassword)</div>
-  <div class="center-block"> @Html.PasswordFor(model => model.ConfirmPassword)</div>
-  <div class="center-block"> @Html.LabelFor(m => m.UserTypeID)</div>
-  <div class="center-block"> @Html.DropDownListFor(m => m.UserTypeID, new SelectList(Model.UserTypeList, "Value", "Text"), "Select User Type...")</div>
-  <div class="center-block">   <input type="submit" value="Register" /></div>
-  @Html.ValidationSummary()
-}
-
-@*
-@Html.LabelFor(model=> model.Email)
-@Html.TextBoxFor(model => model.Email)
-@Html.LabelFor(model=> model.Name)
-@Html.TextBoxFor(model => model.Name)
-@Html.LabelFor(model=> model.Surname)
-@Html.TextBoxFor(model => model.Surname)
-@Html.LabelFor(model=> model.Password)
-@Html.TextBoxFor(model => model.Password)
-@Html.LabelFor(model=> model.ConfirmPassword)
-@Html.TextBoxFor(model => model.ConfirmPassword)
-@Html.LabelFor(m => m.UserTypeID)
-@Html.DropDownListFor(m => m.UserTypeID, new SelectList(Model.UserTypeList, "Value", "Text"), "Select User Type...")
-@Html.ValidationMessageFor(m => m.UserTypeID)
-@*
-@*
 <form asp-controller="Account" asp-action="Register" method="post">
-    <table>
-        <tr>
-          <td><label asp-for="Email"></label></td>
-          <td><input asp-for="Email" /></td>
-        </tr>
-        <tr>
-            <td><label asp-for="Name"></label></td>
-            <td><input asp-for="Name" /></td>
-        </tr>
-        <tr>
-            <td><label asp-for="Surname"></label></td>
-            <td><input asp-for="Surname" /></td>
-        </tr>
-        <tr>
-            <td><label asp-for="Password"></label></td>
-            <td><input asp-for="Password" /></td>
-        </tr>
-        <tr>
-            <td><label asp-for="ConfirmPassword"></label></td>
-            <td><input asp-for="ConfirmPassword" /></td>
-        </tr>
-        <tr>
-
-        </tr>
-        <tr>
-
-        </tr>
-        <tr>
-            <td colspan="2"><input type="submit"
-             value="Register" /></td>
-        </tr>
-    </table>
-    <div asp-validation-summary="All" ></div>
+          <div class="generic-error" asp-validation-summary="All" ></div>
+          <div class="center-block"><label asp-for="Email" ></label></div>
+          <div class="center-block"><input asp-for="Email" required/></div>
+          <div class="center-block"><label asp-for="Name"></label></div>
+          <div class="center-block"><input asp-for="Name" minlength="2" maxlength="100" required/></div>
+          <div class="center-block"><label asp-for="Surname"></label></div>
+          <div class="center-block"><input asp-for="Surname" minlength="2" maxlength="100" required/></div>
+          <div class="center-block"><label asp-for="Password"></label></div>
+          <div class="center-block"><input asp-for="Password" minlength="6" maxlength="100" required/></div>
+          <div class="center-block"><label asp-for="ConfirmPassword"></label></div>
+          <div class="center-block"><input asp-for="ConfirmPassword" minlength="6" maxlength="100" required/></div>
+          <div class="center-block"> @Html.LabelFor(m => m.UserTypeID)</div>
+         <div class="center-block"> @Html.DropDownListFor(m => m.UserTypeID, new SelectList(Model.UserTypeList, "Value", "Text"))</div>
+          <div class="center-block"><input type="submit"   value="Register" class="reg" /></div>
+          <a asp-controller="Account" asp-action="Login">Try to Login..</a>
 </form>
-*@

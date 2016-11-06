@@ -6,45 +6,15 @@
 
 @model OnlineMarkerCW.ViewModels.LoginViewModel
 
-@*
-<script src="~/Scripts/jquery.js"></script>
-<script src="~/Scripts/jquery.validate.js"></script>
-<script src="~/Scripts/jquery.validate.unobtrusive.js">
-</script>*@
 
 
-@using (Html.BeginForm("Login", "Account"))
-{
-   @Html.AntiForgeryToken() @*orivude token for anti cross site cookie forger*@
-   <h1>Login</h1>
-    @Html.EditorForModel();
-    <input type="submit" value="Login" />
-    <br></br>
-    @Html.ActionLink("Register First..", "Register", "Account")
-    @Html.ValidationSummary()
-}
-@*
+<h1 class="login-heading"> <span> Please login <span></h1>
 <form asp-controller="Account" asp-action="Login" method="post">
-    <table>
-        <tr>
-            <td><label asp-for="Email"></label></td>
-            <td><input asp-for="Email" /></td>
-        </tr>
-        <tr>
-            <td><label asp-for="Password"></label></td>
-            <td><input asp-for="Password" /></td>
-        </tr>
-        <tr>
-            <td><label asp-for="RememberMe"></label></td>
-            <td><input asp-for="RememberMe" /></td>
-        </tr>
-        <tr>
-            <td colspan="2"><input type="submit"
-            value="Login" /></td>
-
-        </tr>
-    </table>
-    <a asp-area="" asp-controller="" asp-action="Register"></a>
-    <div asp-validation-summary="All"></div>
+  <div class="center-block"><label asp-for="Email"></label></div>
+  <div class="center-block"><input asp-for="Email" required/></div>
+  <div class="center-block"><label asp-for="Password"></label></div>
+  <div class="center-block"><input asp-for="Password" minlength="6" maxlength="100" required/></div>
+  <div class="center-block"><input type="submit" value="Login" class="reg" /></div>
 </form>
-*@
+  <div asp-validation-summary="All" class="generic-error"></div>
+  <a asp-controller="Account" asp-action="Register">Register First..</a>

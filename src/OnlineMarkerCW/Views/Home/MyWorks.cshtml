@@ -4,28 +4,38 @@
 }
 @model  List<OnlineMarkerCW.Models.Work>
 
-<h1>Hey @ViewData["Title"]</h1>
+<h1>@ViewData["Title"]</h1>
 
 <h3 class="generic-message" >@ViewData["upload-message"]</h3>
 <h3 class="generic-error" >@ViewData["error"]</h3>
 
 
+<h3 > Submit an HTML file </h3>
 
  <form method="post" asp-action="MyWorks" asp-controller="Home" enctype="multipart/form-data">
      <input type="file" name="file" accept=".html"/>
      <input type="submit" value="Upload" />
  </form>
 
+
 <h3 > List of my HTML submissions </h3>
-  <p>File Name    | Submit Date     |    Mark</p>
-<ul>
+
+<div class="submissions_list">
+
+  <p >File Name   |  Submit Date
+     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    |     Mark</p>
+<ol>
   @foreach (var work in Model) {
     <li>
     <a asp-controller="Home" asp-route-id="@work.WorkID" asp-action="WorkView"> @work.FileName</a> | @work.SubmitDate |
-    @if (work.Marked == true)
-      { @work.Mark }
+    @if (@work.Marked)
+      {
+         <span class="@( @work.Mark < 40 ? "generic-error" : "generic-message")" > @work.Mark </span>
+       }
     else
       { <span>Not marked</span> }
     </li>
   }
-</ul>
+</ol>
+</div>

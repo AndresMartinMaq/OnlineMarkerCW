@@ -8,7 +8,9 @@
             //load the right menu bar in right shape for the right dimmensions
             $(window).bind("load resize", function () {
               //FIXME: Rihards - test if 768 threshhold is working ok.
-                if ($(this).width() < 768) {
+                //scrollbar has to be taken into account, as css and js intepreters see windows width differently
+                var scrollbarWidth=(window.innerWidth-$(window).width());
+                if ($(this).width() < (768-scrollbarWidth)) {
                     $('div.sidebar-collapse').addClass('collapse')
                     $('nav img').addClass('collapse')
                 } else {

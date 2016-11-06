@@ -7,7 +7,7 @@
     <link rel="apple-touch-icon image_src" sizes="144x144" href="/apple-icon-144x144.png">
 
 
-    <title>@ViewData["Title"] - OnlineMarkerCW</title>
+    <title>@ViewData["Title"] - OnlineMarker</title>
 
     <environment names="Development">
         <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css" />
@@ -32,21 +32,24 @@
               <span class="icon-bar"></span>
               <span class="icon-bar"></span>
           </button>
-          <span class="navbar-brand "> Welcome to <a asp-area="" asp-controller="Home" asp-action="Index" >OnlineMarkerCW</a>, @ViewData["user_name"]!</span>
+          <span class="logo "> Welcome to <a asp-area="" asp-controller="Home" asp-action="Index" >OnlineMarker</a>, @ViewData["user_name"]!</span>
       </div>
   </nav>
-
   <div class="wrapper" >
     <nav class="navbar-default sidebar">
         <div class="sidebar-collapse">
             <ul class="nav">
                 <li> <img  src="~/img/quick-logo_min.png" class="user-image img-responsive" alt="The OnlineMarker Logo"/> </li>
+                @if ( @ViewData["user_role"].ToString() == "Student") {
+                  <li><a asp-controller="Home" asp-action="MyWorks">My Submissions</a></li>
+                } else {
+                  <li><a asp-controller="Home" asp-action="MyMarkings">My Markings</a></li>
+                }
 
-                <li>@Html.ActionLink("My Works", "MyWorks", "Home")</li>
-                <li>@Html.ActionLink("About", "About", "Home")</li>
-                <li>
+                <li><a asp-controller="Home" asp-action="About">About</a></li>
+                  <li>
                     <form asp-controller="Account" asp-action="Logout" method="post">
-                      <input type="submit" value="Logout">
+                      <input type="submit" value="Logout" class="logout">
                     </form>
                 </li>
             </ul>
@@ -57,7 +60,7 @@
     </section>
   </div>
   <footer>
-    <p>&copy; 2016 - OnlineMarkerCW</p>
+    <p>&copy; 2016 - OnlineMarker</p>
   </footer>
 
 

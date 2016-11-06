@@ -25,17 +25,20 @@
 
   <nav class="navbar-default topbar" style="margin-bottom: 0">
       <div class="navbar-header center-block">
-            <span class="navbar-brand "> Welcome to OnlineMarkerCW</span>
+            <span class="logo "><a asp-controller="Home" asp-action="Index" >OnlineMarker</a></span>
       </div>
   </nav>
 
   <div class="wrapper" >
-    <section class="body-content">
+    <section class="body-content login-content">
+      <div>
+      <img  src="~/img/quick-logo_min.png" class="user-image img-responsive" alt="The OnlineMarker Logo"/>
           @RenderBody()
+      </div>
     </section>
   </div>
   <footer>
-    <p>&copy; 2016 - OnlineMarkerCW</p>
+    <p>&copy; 2016 - OnlineMarker</p>
   </footer>
 
 
