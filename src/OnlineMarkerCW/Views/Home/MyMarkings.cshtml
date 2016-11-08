@@ -1,3 +1,44 @@
 @{
   ViewData["Title"] = "My Markings";
 }
+@model  List<OnlineMarkerCW.Models.Work>
+
+<div class="row">
+    <div class="col-md-12">
+        <h1>Students' Coursework</h1>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-5">
+        <h2>My Students</h2>
+    </div>
+    <div class="col-md-5">
+        <h2>Submissions</h2>
+    </div>
+    <div class="col-md-2">
+        <h2>Grades</h2>
+    </div>
+</div>
+<br>
+<br>
+@foreach (var work in Model)
+{
+    <div class="row">
+        <div class="col-md-5">
+            <p>@work.Owner.Name @work.Owner.Surname</p>
+        </div>
+        <div class="col-md-5">
+            <a asp-controller="Home" asp-route-id="@work.WorkID" asp-action="WorkViewForMarker">Work with ID: @work.WorkID</a>
+            <a asp-controller="Home" asp-route-id="@work.WorkID" asp-action="WorkView"> @work.FileName</a> | @work.SubmitDate
+        </div>
+        <div class="col-md-2">
+            @if (@work.Marked)
+            {
+                <p class="@( @work.Mark < 40 ? "generic-error" : "generic-message")"> @work.Mark </p>
+            }
+            else
+            { <p>Not marked</p> }
+        </div>
+    </div>
+    <br>
+}

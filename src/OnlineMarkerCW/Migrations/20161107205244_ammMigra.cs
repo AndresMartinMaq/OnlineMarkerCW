@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace OnlineMarkerCW.Migrations
 {
-    public partial class MyFirstMigration : Migration
+    public partial class ammMigra : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -112,9 +112,11 @@ namespace OnlineMarkerCW.Migrations
                     WorkID = table.Column<int>(nullable: false)
                         .Annotation("Autoincrement", true),
                     Feedback = table.Column<string>(nullable: true),
+                    FileName = table.Column<string>(nullable: true),
                     FilePath = table.Column<string>(nullable: true),
                     Mark = table.Column<int>(nullable: false),
                     MarkDate = table.Column<DateTime>(nullable: false),
+                    Marked = table.Column<bool>(nullable: false),
                     MarkerId = table.Column<string>(nullable: true),
                     OwnerId = table.Column<string>(nullable: true),
                     SubmitDate = table.Column<DateTime>(nullable: false)

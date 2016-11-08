@@ -167,11 +167,35 @@ namespace OnlineMarkerCW.Controllers
 
       }
 
-      [Authorize(Roles = "Teacher")]
-      [HttpGet]
-      public IActionResult MyMarkings()  {
-        return View();
-      }
+        [Authorize(Roles = "Teacher")]
+        [HttpGet]
+        public async Task<IActionResult> MyMarkings()  {
+            var user = await _userManager.GetUserAsync(this.User);
+            var model = await _context.Works.OrderBy(w => w.SubmitDate).Include(w => w.Owner).ToListAsync(); //TODO filter works
+            foreach (var work in model){
+                //work.Owner = await _userManager.GetUserAsync(work.Owner);
+                // _logger.LogWarning(0, "Work is {string}", work);
+                //work.Owner = await _userManager.FindByIdAsync(work.Owner.Id);
+          //      _context.Entry(work).Reference(w => w.Owner).Load();
+            }
+            
+            return View(model);
+        }
+
+        [Authorize(Roles = "Teacher")]
+        [HttpGet]
+        public async Task<IActionResult> WorkViewForMarker(int workID)
+        {
+            var work = await _context.Works.FirstOrDefaultAsync(w => w.WorkID == workID);
+            var user = await _userManager.GetUserAsync(this.User);
+            //check if owner or teacher tries to access the page
+            if (user_role == "Teacher"){
+                return View(work);
+            }
+            else{
+                return RedirectToAction(nameof(HomeController.AccessDenied), "Home");
+            }
+        }
 
 
         [Authorize]

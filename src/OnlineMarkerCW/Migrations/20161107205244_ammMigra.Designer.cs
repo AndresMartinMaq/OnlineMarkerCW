@@ -8,8 +8,8 @@ using OnlineMarkerCW.Data;
 namespace OnlineMarkerCW.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20161105202006_MyFirstMigration")]
-    partial class MyFirstMigration
+    [Migration("20161107205244_ammMigra")]
+    partial class ammMigra
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -187,11 +187,15 @@ namespace OnlineMarkerCW.Migrations
 
                     b.Property<string>("Feedback");
 
+                    b.Property<string>("FileName");
+
                     b.Property<string>("FilePath");
 
                     b.Property<int>("Mark");
 
                     b.Property<DateTime>("MarkDate");
+
+                    b.Property<bool>("Marked");
 
                     b.Property<string>("MarkerId");
 
