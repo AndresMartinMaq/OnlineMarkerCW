@@ -171,22 +171,16 @@ namespace OnlineMarkerCW.Controllers
         [HttpGet]
         public async Task<IActionResult> MyMarkings()  {
             var user = await _userManager.GetUserAsync(this.User);
-            var model = await _context.Works.OrderBy(w => w.SubmitDate).Include(w => w.Owner).ToListAsync(); //TODO filter works
-            foreach (var work in model){
-                //work.Owner = await _userManager.GetUserAsync(work.Owner);
-                // _logger.LogWarning(0, "Work is {string}", work);
-                //work.Owner = await _userManager.FindByIdAsync(work.Owner.Id);
-          //      _context.Entry(work).Reference(w => w.Owner).Load();
-            }
-            
+            //Include Owner tells the framework to load the foreign key field Owner, otherwise it will be null.
+            var model = await _context.Works.OrderBy(w => w.SubmitDate).Include(w => w.Owner).ToListAsync();
             return View(model);
         }
 
         [Authorize(Roles = "Teacher")]
         [HttpGet]
-        public async Task<IActionResult> WorkViewForMarker(int workID)
+        public async Task<IActionResult> WorkViewForMarker(int ID)
         {
-            var work = await _context.Works.FirstOrDefaultAsync(w => w.WorkID == workID);
+            var work = await _context.Works.FirstOrDefaultAsync(w => w.WorkID == ID);
             var user = await _userManager.GetUserAsync(this.User);
             //check if owner or teacher tries to access the page
             if (user_role == "Teacher"){
@@ -195,6 +189,25 @@ namespace OnlineMarkerCW.Controllers
             else{
                 return RedirectToAction(nameof(HomeController.AccessDenied), "Home");
             }
+        }
+
+        [Authorize(Roles = "Teacher")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        //Update the Work in db to include new mark and feedback.
+        public async Task<IActionResult> WorkViewForMarker(int id, String feedback, int mark)//TODO validation
+        {
+            var work = await _context.Works.FirstOrDefaultAsync(w => w.WorkID == id);
+            var user = await _userManager.GetUserAsync(this.User);
+            _context.Update(work);
+                work.Marked = true;
+                work.MarkDate = DateTime.Now;
+                work.Feedback = feedback;
+                work.Mark = mark;
+                work.Marker = user;
+            _context.SaveChanges();
+            ViewData["update-confirmation-msg"] = "Feedback and Mark Updated Successfully";
+            return RedirectToAction("WorkViewForMarker", work.WorkID);
         }
 
 

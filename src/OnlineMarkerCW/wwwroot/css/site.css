@@ -44,7 +44,7 @@ pre {
 }
 
 code {
-  max-height : 800px;
+  max-height : 600px;
   width: 100%;
   overflow-x: scroll !important;
   overflow-y: scroll;

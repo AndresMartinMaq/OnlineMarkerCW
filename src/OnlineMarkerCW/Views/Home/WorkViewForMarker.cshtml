@@ -1,42 +1,144 @@
 ﻿
 @model OnlineMarkerCW.Models.Work
 @using System.IO
+@section header {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.7.0/styles/default.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.7.0/highlight.min.js"></script>
+}
+@{ 
+    ViewData["Title"] = "Submission " + @Model.FileName;
+    var file_content = System.IO.File.ReadAllLines(@Model.FilePath);
+}
 
+<h1>Viewing @Model.FileName</h1>
 
-<div class="row">
+<h3 class="generic-message">@ViewData["update-confirmation-msg"]</h3>
+
+@if (ViewData["user_role"] == "Student")
+{
+    <form method="post" asp-action="WorkDelete" asp-controller="Home" asp-route-id="@Model.WorkID">
+        <input type="submit" class="red" value="Delete this upload" />
+    </form>
+}
+<h3 class="render_switch_btn"> 
+    <a id="src_code_button">html source code </a> | 
+    <a id="html_render_button"> html render result </a> | 
+    <a id="sidebyside_button"> side-by-side view </a> </h3>
+
+<div class="view-container-src">
+    <pre><code class="html">
+    @foreach (var  file_line in @file_content) {
+      @Html.Raw(@Html.Encode(@file_line));
+      @Html.Raw("\n")
+    }
+  </code></pre>
+</div>
+
+<div class="view-container-render">
+    <iframe class="frame" width="100%" height="800px" data-srcdoc="
+            @foreach (var file_line in @file_content) { @Html.Raw(@Html.Encode(@file_line))   } ">
+        If you're seeing this, your browser doesn't support iFrames
+    </iframe>
+</div>
+
+<div class="row view-container-both">
     <div class="col-md-6">
         <h2>Rendered Coursework</h2>
-        <iframe src="/ExampleWorkByStudent.html" sandbox width="100%" height="500px">If you're seeing this, your browser doesn't support iFrames</iframe>
+        <iframe class="frame" width="100%" height="600px" data-srcdoc="
+                @foreach (var file_line in @file_content) { @Html.Raw(@Html.Encode(@file_line))  } ">
+            If you're seeing this, your browser doesn't support iFrames
+        </iframe>
+
     </div>
     <div class="col-md-6">
         <h2>Coursework Source Code</h2>
-        <!-- If the model has just the file name: Html.Raw(File.ReadAllText(Server.MapPath(<htmlpath>))) -->
-        <!-- Assuming we have the string of html, include the variable inside the thing below.-->
-        <div style="overflow-y: scroll; height:500px;">
+        <div>
             <pre><code>
-                @Html.Raw(Html.Encode("<h2>This is an example HTML coursework as if made by a student to be marked.</h2>"));
+                @foreach (var file_line in @file_content){
+                    @Html.Raw(@Html.Encode(@file_line));
+                    @Html.Raw("\n")
+                }
             </code></pre>
         </div>
     </div>
 </div>
-<br>
-<br>
-<div class="row">
 
-@using (Html.BeginForm("Work", "Teacher", FormMethod.Post, new { id = "gradingForm" }))
+<br>
+
+<div class="row">
+@using (Html.BeginForm("WorkViewForMarker", "Home", FormMethod.Post, new { id = "gradingForm" }))
 {
     <div class="col-md-4">
-        <label>Select Grade</label>
-        <br>
-        <input form="gradingForm" type="number" name="mark" min="0" max="100">
+        @if (Model.Marked){
+            <h3>Current Awarded Mark</h3>
+            <br>
+            <input form="gradingForm" type="number" name="mark" min="0" max="100" value=@Model.Mark>
+        } else {
+            <h3>Select Grade</h3>
+            <br>
+            <input form="gradingForm" type="number" name="mark" min="0" max="100">
+        }
+        
     </div>
     <div class="col-md-8"> 
         @Html.AntiForgeryToken()
-        <label>Provide Feedback</label>
-        <textarea class="larger" form="gradingForm" name="feedback" rows="8"></textarea>
+        <h3>Feedback</h3>
+        <textarea class="larger" form="gradingForm" name="feedback" rows="8">
+            @Model.Feedback;
+        </textarea>
         <br>
         <input type="submit" value="Sumbit Marking">
         @Html.ValidationSummary()
     </div>
 }
 </div>
+
+@section scripts {
+    @*init the highlither for the html syntax*@
+    <script>hljs.initHighlightingOnLoad();</script>
+
+    @*bind and init the event listeerns for tab clicking and chanching the corresponding views to swtich between the source code and the rendered restult for the html*@
+    <script>
+  (function ($) {
+      "use strict";
+      //create a module for tab switching
+      var myWorkscript = {
+
+          main_fun: function () {
+              //show and hide is used and binded to the approporiate tab links, as toggle would make the same link to toggle the views and not to keep the display state.
+              $("#src_code_button").bind("click", function () {
+                $(".view-container-both").hide();
+                $(".view-container-src").show();
+                $(".view-container-render").hide();
+                $( '.frame' ).attr( 'srcdoc', ' ');
+                });
+
+              $("#html_render_button").bind("click", function () {
+                $(".view-container-both").hide();
+                $(".view-container-src").hide();
+                $( '.frame' ).attr( 'srcdoc', function () { return $( this ).attr('data-srcdoc'); });
+                $(".view-container-render").show();
+              });
+
+              $("#sidebyside_button").bind("click", function () {
+                  $(".view-container-render").hide();
+                  $(".view-container-src").hide();
+                  $('.frame').attr('srcdoc', function () { return $(this).attr('data-srcdoc'); });
+                  $(".view-container-both").show();
+              });
+          },
+
+            //init the the event binding to the links
+              init: function () {
+                myWorkscript.main_fun();
+                $(".view-container-both").hide();
+              }
+          }
+          //launch the app
+              $(document).ready(function () {
+                  myWorkscript.init();
+              });
+
+  }(jQuery));
+    </script>
+}

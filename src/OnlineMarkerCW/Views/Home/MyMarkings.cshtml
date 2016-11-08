@@ -28,8 +28,7 @@
             <p>@work.Owner.Name @work.Owner.Surname</p>
         </div>
         <div class="col-md-5">
-            <a asp-controller="Home" asp-route-id="@work.WorkID" asp-action="WorkViewForMarker">Work with ID: @work.WorkID</a>
-            <a asp-controller="Home" asp-route-id="@work.WorkID" asp-action="WorkView"> @work.FileName</a> | @work.SubmitDate
+            <a asp-controller="Home" asp-route-id="@work.WorkID" asp-action="WorkViewForMarker"> @work.FileName</a> | @work.SubmitDate
         </div>
         <div class="col-md-2">
             @if (@work.Marked)
