@@ -6,6 +6,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Security.Principal;
 using System.Threading.Tasks;
+using System.Text.Encodings.Web;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -66,7 +67,7 @@ namespace OnlineMarkerCW.Controllers
         //session example
         // ViewData["string-from-session"] = HttpContext.Session.GetString("session_mail");
 
-        //heck for the user role example
+        //Check for the user role example
         //_userManager.IsInRoleAsync(user,"Student").Result);
 
           if(user_role == "Teacher")
@@ -144,7 +145,7 @@ namespace OnlineMarkerCW.Controllers
        public async Task<IActionResult> WorkDelete(int ID)  {
         var work =  await _context.Works.FirstOrDefaultAsync(w => w.WorkID == ID);
         var user = await _userManager.GetUserAsync(this.User);
-        //check if owner is seding the request to delte
+        //check if owner is sending the request to delete
         if (work.Owner == user) {
           _context.Works.Remove(work);
           _context.SaveChanges();
@@ -197,19 +198,29 @@ namespace OnlineMarkerCW.Controllers
         //Update the Work in db to include new mark and feedback.
         public async Task<IActionResult> WorkViewForMarker(int id, String feedback, int mark)//TODO validation
         {
+            //Validate input.
+            //string feedbackEncoded = HtmlEncoder.Default.Encode(feedback); isn't necessary, the framework seems to take care of injections here.
+            if (mark > 100 || mark < 0)
+            {
+                ModelState.AddModelError("Mark Error", "Mark should be a number from 0 to 100.");
+            }
+
+            //Write to db.
             var work = await _context.Works.FirstOrDefaultAsync(w => w.WorkID == id);
             var user = await _userManager.GetUserAsync(this.User);
-            _context.Update(work);
+            if (ModelState.IsValid)
+            {
+                _context.Update(work);
                 work.Marked = true;
                 work.MarkDate = DateTime.Now;
                 work.Feedback = feedback;
                 work.Mark = mark;
                 work.Marker = user;
-            _context.SaveChanges();
-            ViewData["update-confirmation-msg"] = "Feedback and Mark Updated Successfully";
-            return RedirectToAction("WorkViewForMarker", work.WorkID);
+                _context.SaveChanges();
+                ViewData["update-confirmation-msg"] = "Feedback and Mark Updated Successfully";
+            }
+            return View(work);
         }
-
 
         [Authorize]
         [HttpGet]

@@ -13,6 +13,7 @@
 <h1>Viewing @Model.FileName</h1>
 
 <h3 class="generic-message">@ViewData["update-confirmation-msg"]</h3>
+<h3 class="generic-error">@Html.ValidationSummary()</h3>
 
 @if (ViewData["user_role"] == "Student")
 {
@@ -83,9 +84,7 @@
     <div class="col-md-8"> 
         @Html.AntiForgeryToken()
         <h3>Feedback</h3>
-        <textarea class="larger" form="gradingForm" name="feedback" rows="8">
-            @Model.Feedback;
-        </textarea>
+        <textarea class="larger" form="gradingForm" name="feedback" rows="8">@Model.Feedback</textarea>
         <br>
         <input type="submit" value="Sumbit Marking">
         @Html.ValidationSummary()
