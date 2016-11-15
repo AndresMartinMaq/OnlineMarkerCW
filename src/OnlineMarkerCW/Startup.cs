@@ -130,6 +130,9 @@ namespace OnlineMarkerCW
                     name: "default",
                     template: "{controller=Home}/{action=Index}/{id?}");
             });
+
+          //cusstom error code message
+          app.UseStatusCodePagesWithRedirects("/Error_Message/{0}");
             //init the db prepopulation
             //DbInitializer.Initialize(context);
         }

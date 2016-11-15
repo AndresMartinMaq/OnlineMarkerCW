@@ -54,7 +54,7 @@ namespace OnlineMarkerCW.Controllers
       public HomeController(UserManager<ApplicationUser> userManager,ILoggerFactory loggerFactory, IHostingEnvironment hostingEnv, ApplicationDbContext context)
       {
           _userManager = userManager;
-          _logger = loggerFactory.CreateLogger<AccountController>();
+          _logger = loggerFactory.CreateLogger<HomeController>();
           _hostingEnv = hostingEnv;
           _context = context;
 
@@ -163,7 +163,7 @@ namespace OnlineMarkerCW.Controllers
         if (work?.Owner == user || user_role == "Teacher") {
            return View(work);
         } else {
-          return RedirectToAction(nameof(HomeController.AccessDenied), "Home");
+          return Redirect("/Error_Message/403");
         }
 
       }
@@ -241,10 +241,20 @@ namespace OnlineMarkerCW.Controllers
 
           }
 
-          //GET: /Home/AccessDenied
-          public IActionResult AccessDenied() {
+          [Authorize]
+          [HttpGet]
+          [Route("/Error_Message/{code}")]
+          public IActionResult Error_Message(int code) {
+          if (code == 403 ) {
             ViewData["Message"] = "You are not allowed to access this page, please try another one.";
-            ViewData["Tittle"] = "Access Denied";
+            ViewData["Tittle"] = "403 Access Denied";
+        } else if ( code == 404) {
+            ViewData["Message"] = "Page not found.";
+            ViewData["Title"] = "404 Not Found";
+        } else {
+          ViewData["Title"] = code.ToString();
+          ViewData["Message"] = code.ToString();
+        }
             return View("Message_or_error");
           }
     }

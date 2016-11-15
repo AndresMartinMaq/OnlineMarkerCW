@@ -126,7 +126,13 @@ namespace OnlineMarkerCW.Controllers
                 {
                     //dont use session, use claims, claims store the information under the cookie rather than database, hence work as same way as session
                     _logger.LogInformation(1, "User logged in and stulst is {result}", result);
-                    return RedirectToAction(nameof(HomeController.Index), "Home");
+                    if (Url.IsLocalUrl(returnUrl))
+                      {
+                        return Redirect(returnUrl);
+                      }
+                      return RedirectToAction(nameof(HomeController.Index), "Home");
+
+
                 }
                 else
                 {
@@ -148,6 +154,11 @@ namespace OnlineMarkerCW.Controllers
             _logger.LogInformation(4, "User logged out.");
             //HttpContext.Session.Abandon();
             return RedirectToAction(nameof(HomeController.Index), "Home");
+        }
+
+        public IActionResult AccessDenied()
+        {
+          return Redirect("/Error_Message/403");
         }
 
         //helper functions

@@ -189,7 +189,7 @@ input[type*=submit].reg{
 }
 
 input[type*=submit].logout:hover{
-  background-color: #fff;
+  background-color: #eee;
 
 }
 input[type*=submit].logout{
@@ -247,6 +247,9 @@ h3 {
   color: #888888;
 }
 
+h1.login-heading {
+  text-align: center;
+}
 /*For bigger screens only*/
 
  @media(min-width:768px) {

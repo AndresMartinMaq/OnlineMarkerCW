@@ -78,6 +78,14 @@
 
 
               });
+
+              $("input[type*=submit].red").bind("click", function () {
+                if(confirm("Do you want to delete this ?"))
+                  document.forms[0].submit();
+                else
+                  return false;
+
+              }); 
           },
 
           gen_Iframe: function() {
