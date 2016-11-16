@@ -57,6 +57,7 @@ code {
   width: 100%;
 }
 
+
 .generic-error {
   color: red;
 }
@@ -243,19 +244,49 @@ h3.render_switch_btn > a {
   cursor: pointer;
 }
 
-h3 {
+h3,h4 {
   color: #888888;
+}
+
+span.feedback-view {
+  color:black;
+  font-size: 15px;
 }
 
 h1.login-heading {
   text-align: center;
 }
+
+
+  .video-wrapper {
+    border: 1px solid #e3e3e3;
+    border-radius: 4px;
+    padding: 15px;
+  }
+
+.video-frame {
+  position: relative;
+  width: 100%;
+  height: 0;
+  padding-bottom: 56.25%;
+}
+
+
+.video-frame > iframe {
+    /*width="560" height="315"*/
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
 /*For bigger screens only*/
 
  @media(min-width:768px) {
    .body-content {
       margin-left: 260px;
-      min-height: 700px;
+      min-height: 900px;
    }
 
    .login-content {
@@ -269,18 +300,40 @@ h1.login-heading {
       position: absolute;
       width: 260px;
   }
+
 }
+
+@media(min-width: 1350px) {
+    .video-frame {
+    max-width: 1100px;
+  }
+    .video-wrapper {
+      max-width: 1130px;
+      padding: 15px;
+
+  }
+
+}
+
+@media(max-width: 768px) {
+
+    #src_code_button::after {
+      content:"\a";
+      white-space: pre;
+    }
+
+    #html_render_button::after {
+      content:"\a";
+      white-space: pre;
+    }
+
+    .render_switch_btn::before {
+      content:"|";
+    }
+}
+
 /*for mobile phone screens*/
 @media(max-width: 460px) {
-
-  #src_code_button::after {
-    content:"\a";
-    white-space: pre;
-  }
-  .render_switch_btn::before {
-    content:"|";
-  }
-
   nav.topbar span.logo {
     max-width: 80%;
     min-height: 60px;

@@ -5,7 +5,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.7.0/styles/default.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.7.0/highlight.min.js"></script>
 }
-@{ 
+@{
     ViewData["Title"] = "Submission " + @Model.FileName;
     var file_content = System.IO.File.ReadAllLines(@Model.FilePath);
 }
@@ -21,9 +21,9 @@
         <input type="submit" class="red" value="Delete this upload" />
     </form>
 }
-<h3 class="render_switch_btn"> 
-    <a id="src_code_button">html source code </a> | 
-    <a id="html_render_button"> html render result </a> | 
+<h3 class="render_switch_btn">
+    <a id="src_code_button">html source code </a> |
+    <a id="html_render_button"> html render result </a> |
     <a id="sidebyside_button"> side-by-side view </a> </h3>
 
 <div class="view-container-src">
@@ -79,9 +79,9 @@
             <br>
             <input form="gradingForm" type="number" name="mark" min="0" max="100">
         }
-        
+
     </div>
-    <div class="col-md-8"> 
+    <div class="col-md-8">
         @Html.AntiForgeryToken()
         <h3>Feedback</h3>
         <textarea class="larger" form="gradingForm" name="feedback" rows="8">@Model.Feedback</textarea>
@@ -93,51 +93,10 @@
 </div>
 
 @section scripts {
-    @*init the highlither for the html syntax*@
-    <script>hljs.initHighlightingOnLoad();</script>
-
-    @*bind and init the event listeerns for tab clicking and chanching the corresponding views to swtich between the source code and the rendered restult for the html*@
-    <script>
-  (function ($) {
-      "use strict";
-      //create a module for tab switching
-      var myWorkscript = {
-
-          main_fun: function () {
-              //show and hide is used and binded to the approporiate tab links, as toggle would make the same link to toggle the views and not to keep the display state.
-              $("#src_code_button").bind("click", function () {
-                $(".view-container-both").hide();
-                $(".view-container-src").show();
-                $(".view-container-render").hide();
-                $( '.frame' ).attr( 'srcdoc', ' ');
-                });
-
-              $("#html_render_button").bind("click", function () {
-                $(".view-container-both").hide();
-                $(".view-container-src").hide();
-                $( '.frame' ).attr( 'srcdoc', function () { return $( this ).attr('data-srcdoc'); });
-                $(".view-container-render").show();
-              });
-
-              $("#sidebyside_button").bind("click", function () {
-                  $(".view-container-render").hide();
-                  $(".view-container-src").hide();
-                  $('.frame').attr('srcdoc', function () { return $(this).attr('data-srcdoc'); });
-                  $(".view-container-both").show();
-              });
-          },
-
-            //init the the event binding to the links
-              init: function () {
-                myWorkscript.main_fun();
-                $(".view-container-both").hide();
-              }
-          }
-          //launch the app
-              $(document).ready(function () {
-                  myWorkscript.init();
-              });
-
-  }(jQuery));
-    </script>
+  <environment names="Development">
+      <script src="~/js/code-html-view.js" asp-append-version="true"></script>
+  </environment>
+  <environment names="Staging,Production">
+      <script src="~/js/code-html-view.min.js" asp-append-version="true"></script>
+  </environment>
 }

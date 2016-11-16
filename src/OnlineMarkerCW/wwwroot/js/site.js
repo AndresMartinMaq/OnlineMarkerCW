@@ -17,7 +17,10 @@
                     $('div.sidebar-collapse').removeClass('collapse')
                     $('nav img').removeClass('collapse')
                 }
+             //resize the video frame so that it's ratio is preserved
+             //$(".video-frame").css( 'height', function () { return $(this).width() / 1.7; });
             });
+
         },
           //init the the event binding to the window
             init: function () {

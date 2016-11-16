@@ -188,7 +188,7 @@ namespace OnlineMarkerCW.Controllers
                 return View(work);
             }
             else{
-                return RedirectToAction(nameof(HomeController.AccessDenied), "Home");
+                return Redirect("/Error_Message/403");
             }
         }
 
@@ -241,6 +241,7 @@ namespace OnlineMarkerCW.Controllers
 
           }
 
+          //The universal method for displaying errors
           [Authorize]
           [HttpGet]
           [Route("/Error_Message/{code}")]
