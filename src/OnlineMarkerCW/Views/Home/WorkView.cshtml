@@ -10,7 +10,7 @@
     var file_content = System.IO.File.ReadAllLines(@Model.FilePath);
 }
 
-<h1>Viewing @Model.FileName</h1>
+<h1>Viewing: @Model.FileName</h1>
   @if (@Model.Marked) {
 <h4> Your Mark :  <span class="@( @Model.Mark < 40 ? "generic-error" : "generic-message")" > @Model.Mark </span> </h4>
 <h4> Feeback :  <span class="feedback-view"> @Model.Feedback </span> </h4>

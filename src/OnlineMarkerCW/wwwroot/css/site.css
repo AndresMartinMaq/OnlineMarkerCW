@@ -213,6 +213,7 @@ input[type*=submit].logout{
   text-align:left;
   text-decoration:none;
   min-height: 60px;
+  min-width: 100%
 }
 
 div.submissions_list {
@@ -232,6 +233,10 @@ div.submissions_list > ol {
   padding-left: 15px;
 }
 
+div.sidebar-collapse{
+  padding-left: 0px !important;
+  padding-right: 0px !important;
+}
 .sidebar-collapse > .nav > li {
   border-bottom: 1px solid rgba(107, 108, 109, 0.19);
 }
@@ -314,6 +319,12 @@ h1.login-heading {
   }
 
 }
+
+@media(max-width: 767px) {
+
+    nav img {
+        display: none !important;
+    }
 
 @media(max-width: 768px) {
 

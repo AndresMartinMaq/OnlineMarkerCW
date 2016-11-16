@@ -9,17 +9,18 @@
             $(window).bind("load resize", function () {
               //FIXME: Rihards - test if 768 threshhold is working ok.
                 //scrollbar has to be taken into account, as css and js intepreters see windows width differently
-                var scrollbarWidth=(window.innerWidth-$(window).width());
-                if ($(this).width() < (768-scrollbarWidth)) {
-                    $('div.sidebar-collapse').addClass('collapse')
-                    $('nav img').addClass('collapse')
-                } else {
-                    $('div.sidebar-collapse').removeClass('collapse')
-                    $('nav img').removeClass('collapse')
-                }
+                // var scrollbarWidth=(window.innerWidth-$(window).width());
+                // if ($(this).width() < (768-scrollbarWidth)) {
+                //     $('div.sidebar-collapse').addClass('collapse')
+                // } else {
+                //     $('div.sidebar-collapse').removeClass('collapse')
+                // }
              //resize the video frame so that it's ratio is preserved
              //$(".video-frame").css( 'height', function () { return $(this).width() / 1.7; });
             });
+
+            //after windows loaded and collpase class is or/binded to the sindbar, delete display
+            //$(window).bind("load", function () {
 
         },
           //init the the event binding to the window
