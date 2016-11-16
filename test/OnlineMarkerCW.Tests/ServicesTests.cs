@@ -1,8 +1,10 @@
-// ﻿using System;
+// using System;
 // using Xunit;
+// using Moq;
 // using Microsoft.AspNetCore.Identity;
 // using Microsoft.AspNetCore.Mvc;
 // using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+// using Microsoft.EntityFrameworkCore;
 // using Microsoft.Extensions.Logging;
 // using OnlineMarkerCW.Models;
 //
