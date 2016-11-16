@@ -22,21 +22,19 @@
 
 <div class="submissions_list">
 
-  <p >File Name
-    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Submit Date
-     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    |   &nbsp;&nbsp;&nbsp;  Mark</p>
+  <p >File Name </p >
+    <p >Submit Date </p>
+    <p >Mark</p>
 <ol>
   @foreach (var work in Model) {
     <li>
-    <a asp-controller="Home" asp-route-id="@work.WorkID" asp-action="WorkView"> @work.FileName</a> | @work.SubmitDate |
+    <a asp-controller="Home" asp-route-id="@work.WorkID" title="@work.FileName" asp-action="WorkView"> @work.FileName</a> <p>@work.SubmitDate</p>
     @if (@work.Marked)
       {
-         <span class="@( @work.Mark < 40 ? "generic-error" : "generic-message")" > @work.Mark </span>
+         <p class="@( @work.Mark < 40 ? "generic-error" : "generic-message")" > @work.Mark </p>
        }
     else
-      { <span>Not marked</span> }
+      { <p>Not marked</p> }
     </li>
   }
 </ol>

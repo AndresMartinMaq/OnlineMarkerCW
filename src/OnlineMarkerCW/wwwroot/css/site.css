@@ -222,11 +222,41 @@ div.submissions_list {
   padding-left: 5px;
   border: 1px solid #e3e3e3;
   border-radius: 4px;
+  max-width: 1200px;
 }
 
-div.submissions_list > p {
+div.submissions_list > p:nth-of-type(1){
+  margin-left: 15px;
+}
+
+div.submissions_list > p{
   font-weight: bold;
-  padding-left: 14px;
+  width: calc(33% - 8px);
+  display: inline-block;
+  text-align: center;
+}
+
+div.submissions_list > ol > li > * {
+  width: calc(33% - 3px);
+  display: inline-block;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+div.submissions_list > ol > li:nth-of-type(1) {
+  margin-top: 3px;
+}
+
+div.submissions_list > ol > li > p:nth-of-type(1) {
+  border-right: solid 2px black;
+  border-left: solid 2px black;
+}
+
+div.submissions_list > p:nth-of-type(2) {
+  border-right: solid 2px black;
+  border-left: solid 2px black;
 }
 
 div.submissions_list > ol {
@@ -256,10 +286,15 @@ h3,h4 {
 span.feedback-view {
   color:black;
   font-size: 15px;
+  word-wrap: break-word;
 }
 
 h1.login-heading {
   text-align: center;
+}
+
+h1.view-file-tittle {
+  word-wrap: break-word;
 }
 
 
@@ -325,6 +360,7 @@ h1.login-heading {
     nav img {
         display: none !important;
     }
+}
 
 @media(max-width: 768px) {
 

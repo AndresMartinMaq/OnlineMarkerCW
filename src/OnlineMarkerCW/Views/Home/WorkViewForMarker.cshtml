@@ -10,7 +10,7 @@
     var file_content = System.IO.File.ReadAllLines(@Model.FilePath);
 }
 
-<h1>Viewing: @Model.FileName</h1>
+<h1 class="view-file-tittle">Viewing: @Model.FileName</h1>
 
 <h3 class="generic-message">@ViewData["update-confirmation-msg"]</h3>
 <h3 class="generic-error">@Html.ValidationSummary()</h3>
