@@ -12,6 +12,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using OnlineMarkerCW.Models;
 using OnlineMarkerCW.ViewModels;
+using OnlineMarkerCW.Services;
+using OnlineMarkerCW.Interfaces;
 
 
 namespace OnlineMarkerCW.Controllers
@@ -23,13 +25,15 @@ namespace OnlineMarkerCW.Controllers
         private readonly SignInManager<ApplicationUser> _signInManager;//object for singing in the user and creating a session
         private readonly RoleManager<ApplicationUserRole> _roleManager; //role manager for managing student/teacher roles
         private readonly ILogger _logger;//logger for debuging.
+        private readonly IDbServices _dbServices;//dbservice methods.
 
-        public AccountController( UserManager<ApplicationUser> userManager,  SignInManager<ApplicationUser> signInManager,RoleManager<ApplicationUserRole> roleManager, ILoggerFactory loggerFactory)
+        public AccountController( UserManager<ApplicationUser> userManager,  SignInManager<ApplicationUser> signInManager,RoleManager<ApplicationUserRole> roleManager, ILoggerFactory loggerFactory,IDbServices dbServices )
         {
           _userManager = userManager;
           _signInManager = signInManager;
           _roleManager = roleManager;
           _logger = loggerFactory.CreateLogger<AccountController>();
+          _dbServices = dbServices;
         }
 
         //GET: /Account/Login

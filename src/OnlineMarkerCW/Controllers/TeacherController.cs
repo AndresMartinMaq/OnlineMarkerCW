@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using OnlineMarkerCW.Models;
+using OnlineMarkerCW.Services;
+using OnlineMarkerCW.Interfaces;
 
 namespace OnlineMarkerCW.Controllers
 {
@@ -46,7 +48,18 @@ namespace OnlineMarkerCW.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Work(int id, String feedback, String mark)
         {
-            return null;//TODO 
+            return null;//TODO
         }
+
+        //test mock function
+        public bool IsPrime(int candidate)
+        {
+            if(candidate == 1)
+            {
+                return false;
+            }
+            throw new NotImplementedException("Please create a test first");
+        }
+
     }
 }

@@ -21,6 +21,8 @@ using OnlineMarkerCW.ViewModels;
 using Microsoft.AspNetCore.Hosting;
 using OnlineMarkerCW.Data;
 using Microsoft.EntityFrameworkCore;
+using OnlineMarkerCW.Services;
+using OnlineMarkerCW.Interfaces;
 
 namespace OnlineMarkerCW.Controllers
 {
@@ -34,6 +36,7 @@ namespace OnlineMarkerCW.Controllers
       private string user_ID;
       private IHostingEnvironment _hostingEnv;//required for serving uploaded files
       private ApplicationDbContext _context;// db context for writing to the Works DB
+      private readonly IDbServices _dbServices;//dbservice methods.
 
       //if overriden, this method will be called for every action method in the class
       public override void OnActionExecuting(ActionExecutingContext filterContext)
@@ -51,12 +54,13 @@ namespace OnlineMarkerCW.Controllers
 
 
       //injest the controller with user manager, logger and hosting manger
-      public HomeController(UserManager<ApplicationUser> userManager,ILoggerFactory loggerFactory, IHostingEnvironment hostingEnv, ApplicationDbContext context)
+      public HomeController(UserManager<ApplicationUser> userManager,ILoggerFactory loggerFactory, IHostingEnvironment hostingEnv, ApplicationDbContext context, IDbServices dbServices)
       {
           _userManager = userManager;
           _logger = loggerFactory.CreateLogger<HomeController>();
           _hostingEnv = hostingEnv;
           _context = context;
+          _dbServices = dbServices;
 
       }
 
@@ -87,7 +91,7 @@ namespace OnlineMarkerCW.Controllers
       [Authorize(Roles = "Student")] //you can use authorisation based on the role - quite convient to seperate between teachers and students views
         public async Task<IActionResult> MyWorks() {
           var user = await _userManager.GetUserAsync(this.User);
-          var model = await SubmitedWorks(user);
+          var model = await _dbServices.GetSubmitedWorks(user);
           return View(model);
         }
 
@@ -135,7 +139,7 @@ namespace OnlineMarkerCW.Controllers
               else {
                 ViewData["error"] = "Upload failed, please try again, don't forget to check the file size and extension.";
               }
-              var model = await SubmitedWorks(user);
+              var model = await _dbServices.GetSubmitedWorks(user);
               return View(model);
        }
 
@@ -233,13 +237,6 @@ namespace OnlineMarkerCW.Controllers
         {
             return View();
         }
-
-        //get the list of works by a current user.
-        public async Task<List<Work>> SubmitedWorks(ApplicationUser Owner)
-          {
-               return await _context.Works.Where(w => w.Owner == Owner).OrderBy(w => w.SubmitDate).ToListAsync();
-
-          }
 
           //The universal method for displaying errors
           [Authorize]

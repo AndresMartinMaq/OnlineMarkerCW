@@ -11,6 +11,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using OnlineMarkerCW.Data;
 using OnlineMarkerCW.Models;
+using OnlineMarkerCW.Services;
+using OnlineMarkerCW.Interfaces;
 
 
 namespace OnlineMarkerCW
@@ -40,6 +42,10 @@ namespace OnlineMarkerCW
         {
             // Add framework services.
             services.AddApplicationInsightsTelemetry(Configuration);
+
+            //add the custom created db services
+            services.AddScoped<IDbServices, DbServices>();
+
 
             //add entity framework and sqlserverrerigester  the model context as a service, connect it to the the sql server
             // Add framework services.
