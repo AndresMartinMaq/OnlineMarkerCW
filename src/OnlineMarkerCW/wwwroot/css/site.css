@@ -293,8 +293,9 @@ h1.login-heading {
   text-align: center;
 }
 
-h1.view-file-tittle {
+h1 span.view-file-tittle {
   word-wrap: break-word;
+  font-size: 22px;
 }
 
 
@@ -377,6 +378,7 @@ h1.view-file-tittle {
     .render_switch_btn::before {
       content:"|";
     }
+
 }
 
 /*for mobile phone screens*/
