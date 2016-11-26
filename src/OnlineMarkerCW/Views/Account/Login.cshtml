@@ -9,7 +9,7 @@
 
 
 <h1 class="login-heading"> <span> Please login <span></h1>
-<form asp-controller="Account" asp-action="Login" method="post">
+<form asp-controller="Account" asp-action="Login" asp-route-returnurl='@ViewData["ReturnUrl"]' method="post">
   <div class="center-block"><label asp-for="Email"></label></div>
   <div class="center-block"><input asp-for="Email" required/></div>
   <div class="center-block"><label asp-for="Password"></label></div>

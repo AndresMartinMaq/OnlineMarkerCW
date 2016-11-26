@@ -14,7 +14,7 @@ using OnlineMarkerCW.Models;
 using OnlineMarkerCW.ViewModels;
 using OnlineMarkerCW.Services;
 using OnlineMarkerCW.Interfaces;
-
+using OnlineMarkerCW.Filters;
 
 namespace OnlineMarkerCW.Controllers
 {
@@ -38,28 +38,28 @@ namespace OnlineMarkerCW.Controllers
 
         //GET: /Account/Login
         [HttpGet]
-        [AllowAnonymous]
+        [AnonymousOnly]
         public IActionResult Login(string returnUrl = null)
         {
+            //save redirect data in the view, so that it can preserved for a post request
             ViewData["ReturnUrl"] = returnUrl;
-            return View();
+            return View("Login");
         }
 
         //GET: /Account/Register
         [HttpGet]
-        [AllowAnonymous]
+        [AnonymousOnly]
         public IActionResult Register()
         {
-
+          //Generated a ViemModel instance so that a select list is created
           RegisterViewModel model = new RegisterViewModel();
-          //model.UserTypeList = createUserTypeList();
           return View(model);
 
         }
 
         //POST: /Account/Register
         [HttpPost]
-        [AllowAnonymous]
+        [AnonymousOnly]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register(RegisterViewModel model)
         {
@@ -83,8 +83,7 @@ namespace OnlineMarkerCW.Controllers
                           ApplicationUserRole role = new ApplicationUserRole();
                           role.Name = userType;
                           role.Description = userType;
-                          IdentityResult roleResult = _roleManager.
-                          CreateAsync(role).Result;
+                          IdentityResult roleResult = _roleManager.CreateAsync(role).Result;
                           if(!roleResult.Succeeded)
                           {
                             AddErrors(roleResult);
@@ -103,6 +102,7 @@ namespace OnlineMarkerCW.Controllers
                     await _userManager.AddClaimAsync(user, new Claim(ClaimTypes.Role, userType));
 
                     await _userManager.AddToRoleAsync(user,userType); //add the user to the role
+
                     await _signInManager.SignInAsync(user, isPersistent: false); //sing in the user
                     _logger.LogInformation(3, "User created a new account with password.");
 
@@ -117,7 +117,7 @@ namespace OnlineMarkerCW.Controllers
 
         //POST: /Account/Login
         [HttpPost]
-        [AllowAnonymous]
+        [AnonymousOnly]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LoginViewModel model, string returnUrl = null)
         {
@@ -125,7 +125,7 @@ namespace OnlineMarkerCW.Controllers
             if (ModelState.IsValid)
             {
                 //
-                var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: false);
+                var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, false, lockoutOnFailure: false);
                 if (result.Succeeded)
                 {
                     //dont use session, use claims, claims store the information under the cookie rather than database, hence work as same way as session
@@ -141,16 +141,17 @@ namespace OnlineMarkerCW.Controllers
                 else
                 {
                     ModelState.AddModelError(string.Empty, "Invalid login attempt.");
-                    return View(model);
+                    return View("Login", model);
                 }
             }
 
-            //if there is something wrong, redisplay the view
-            return View(model);
+            //if modelstate is wrong, make sure it is dumped out.
+            return View("Login", model);
         }
 
         //POST: /Account/Logout
         [HttpPost]
+        [Authorize]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()
         {

@@ -1,0 +1,37 @@
+AccountController_UnitTests:
+
+1. Login GET
+
+		*just @return1 the view().
+
+		@(canttested, as they happen in the middleware which is invoked before the action is executed)
+		  [AllowAnonymous] - no logedIn user can perform the action, return the home page.- can be tested - or redirect happens even before the method it reached ?
+
+2. Login POST
+		when right details - @return1 URL - redirection happens
+		when right details - if no redirect url - @return2 home controller.
+		*check that sing in happens, if credentials are rigth, if not @return3 invalid attemnd
+		*verify through the singinManger Moch that sign happens.
+		*check modelstate - if it checks for right POST DATA, if its wrong @return4 current state
+
+
+2. Register GET
+		*[NotLoggedIn] - no logedIn user can perform the action, return the home page.
+		*just @return1 the view() - with the right select list ?
+
+
+3. Register POST - bring out the users claim to the dB seperae service, bring out the creatiing new user to dB services, bring out creating a new role to the services?
+	 *[NotLoggedIn] - no logedIn user can perform the action, return the home page.
+	* [ValidateAntiForgeryToken] token ?
+	*check that model state is valid, if not check tha a proper message is @returned3
+	*check if user creation is sucesfull, if not - make sure a proper message is @returned2
+	*check that roles are created, if they are not defined priorly, if not succesfull @return1 a dump
+	*check that user is added to the role, youll have to mock the user manager for that.
+	*check that sing in happens - youll have to moks the singinMangerforthat.
+	*if everythin sucesfull, make sure redirect to the home controller happnes @ returned1.
+
+4. Logout POST
+  *[Authorize]  - no anonymous user can perform the aciton, check, return access denied.
+  *[ValidateAntiForgeryToken] token ?
+  *verify through the singinManger Moch that signout out happens.
+	*home conrollers it returned

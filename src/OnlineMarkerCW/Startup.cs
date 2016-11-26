@@ -4,16 +4,20 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
 using OnlineMarkerCW.Data;
 using OnlineMarkerCW.Models;
 using OnlineMarkerCW.Services;
 using OnlineMarkerCW.Interfaces;
-
+using OnlineMarkerCW.Policies;
 
 namespace OnlineMarkerCW
 {
@@ -102,7 +106,15 @@ namespace OnlineMarkerCW
                       options.CookieName = ".app_session";
               });
             services.AddMvc();
-        }
+
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("AnonymousOnly",
+                                  policy => policy.Requirements.Add(new AnonymousOnlyRequirement()));
+            });
+
+            services.AddSingleton<IAuthorizationHandler, AnonymousOnlyHandler>();
+            }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory, ApplicationDbContext context)

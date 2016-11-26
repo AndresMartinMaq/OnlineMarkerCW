@@ -363,7 +363,8 @@ h1 span.view-file-tittle {
     }
 }
 
-@media(max-width: 768px) {
+/*submission view rendering links need to collaspe sooner, otherwise they start to wrap words*/
+@media(max-width: 900px) {
 
     #src_code_button::after {
       content:"\a";
@@ -376,7 +377,7 @@ h1 span.view-file-tittle {
     }
 
     .render_switch_btn::before {
-      content:"|";
+      content:"| ";
     }
 
 }
