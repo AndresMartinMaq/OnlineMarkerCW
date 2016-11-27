@@ -200,7 +200,7 @@ namespace OnlineMarkerCW.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         //Update the Work in db to include new mark and feedback.
-        public async Task<IActionResult> WorkViewForMarker(int id, String feedback, int mark)//TODO validation
+        public async Task<IActionResult> WorkViewForMarker(int id, String feedback, int mark)
         {
             //Validate input.
             //string feedbackEncoded = HtmlEncoder.Default.Encode(feedback); isn't necessary, the framework seems to take care of injections here.

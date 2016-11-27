@@ -80,7 +80,7 @@ namespace OnlineMarkerCW.UnitTests.Controllers
          }
 
          [Fact]
-         public async Task   POST_Login_IndexReturnsLoginView_WhenWrongCredentials() {
+         public async Task POST_Login_IndexReturnsLoginView_WhenWrongCredentials() {
             //Arrange
             var m_loginViewModel = new LoginViewModel() {Email = "idontexist@anyhwere.com", Password = "cannotpossibliygowrongwiththisone1111" };
             var m_signInResult   = Microsoft.AspNetCore.Identity.SignInResult.Failed; //	Returns a SignInResult that represents a failed sign-in.

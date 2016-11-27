@@ -3,77 +3,49 @@ using Xunit;
 using Moq;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using OnlineMarkerCW.Models;
 using System.Threading.Tasks;
 using OnlineMarkerCW.Controllers;
 using System.Security.Claims;
-using System.Security.Principal;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.Filters;
 using System.Collections.Generic;
+using OnlineMarkerCW.Data;
 
 namespace OnlineMarkerCW.UnitTests.Controllers
 {
     public class HomeController_UnitTests
     {
-        private readonly OnlineMarkerCW.Controllers.TeacherController _teacherController;
+         private readonly OnlineMarkerCW.Controllers.TeacherController _teacherController;
 
          public HomeController_UnitTests()
          {
              _teacherController = new OnlineMarkerCW.Controllers.TeacherController();
          }
 
-         [Theory]
-         [InlineData(-1)]
-         [InlineData(0)]
-         [InlineData(1)]
-         public void HomeReturnFalseGivenValuesLessThan2(int value)
-         {
-            //test creating of mocks
-            var mockSet = new Mock<DbSet<Work>>();
-            var result = _teacherController.IsPrime(value);
-
-             Assert.False(result, $"{value} should not be prime");
-         }
-
-        //Get a user instance
-        private ApplicationUser generateStu() {
-            ApplicationUser u = new ApplicationUser();
-            u.Name = "Stuart";
-            u.Surname = "Studentsen";
-            return u;
-        }
-
-        [Fact]
-        public async Task IndexTest1()
+        [Theory]
+        [InlineData("Student")]
+        [InlineData("Teacher")]
+        public void IndexRedirectsAccordingToRole(String role)
         {
             // --Arrange--
             //-Controller
             var controller = new HomeController(null, new LoggerFactory(), null, null, null);
             //-User
-            /*var m_userClaims = new Mock<System.Security.Claims.ClaimsPrincipal>();
-            var m_Identity = new Mock<IIdentity>();
-            m_Identity.Setup(identity => identity.IsAuthenticated).Returns(true);
-            m_userClaims.Setup(u => u.Identity).Returns(m_Identity.Object);
-            m_userClaims.Setup(u => u.IsInRole("Student")).Returns(true);*/
-            
-            //-User Alternative
             var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
             {
                  new Claim(ClaimTypes.NameIdentifier, "1"),
                  new Claim("Name", "Stuart"),
                  new Claim(ClaimTypes.Surname, "Dent"),
                  new Claim(ClaimTypes.Email, "some@email.com"),
-                 new Claim(ClaimTypes.Role, "Student")
+                 new Claim(ClaimTypes.Role, role)
             }));
-
-            //m_userClaims.Setup(u => u.FindFirstValue(ClaimTypes.Role)).Returns("Student"); //doesnt work
+            
             //Create a HttpContext
             var testHttpCtxt = new DefaultHttpContext() { User = user };
             //Create ActionExecutingContext.
@@ -92,39 +64,85 @@ namespace OnlineMarkerCW.UnitTests.Controllers
             //Force use of ActionExectuing Context.
             controller.OnActionExecuting(actionExecutingContext);
 
-
-            //Create fake student identity (User).
-            //Method 1
-            /*GenericIdentity fakeIdentity = new GenericIdentity("SomeUser");
-            fakeIdentity.AddClaim(new Claim(ClaimTypes.Role, "Student"));
-            GenericPrincipal principal = new GenericPrincipal(fakeIdentity, null);
-            //Mock Context to include the fake user
-            var mockHttpContext = new Mock<HttpContext>();
-            mockHttpContext.Setup(t => t.User).Returns(principal);
-            var controllerContext = new Mock<ControllerContext>();
-            controllerContext.Setup(t => t.HttpContext).Returns(mockHttpContext.Object);*/
-            //Set home controller to use mock context
-            //controller.ControllerContext = controllerContext.Object;
-
-            /*//Method 2
-            var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
-            {
-                 new Claim(ClaimTypes.Name, "1"),
-                 new Claim(ClaimTypes.Role, "Student")
-            }));
-            //Set context
-            controller.ControllerContext = new ControllerContext() {
-                HttpContext = new DefaultHttpContext() { User = user }
-            };*/
-
-
             // Act
             var result = controller.Index();
 
             // Assert
             var redirectToActionResult = Assert.IsType<RedirectToActionResult>(result);
             Assert.Equal("Home", redirectToActionResult.ControllerName);
-            Assert.Equal("MyWorks", redirectToActionResult.ActionName);     //MyWorks if student, MyMarkings if Teacher.
+            //Should redirect to MyWorks if student, MyMarkings if Teacher.
+            if (role == "Student") {
+                Assert.Equal("MyWorks", redirectToActionResult.ActionName);
+            } else {
+                Assert.Equal("MyMarkings", redirectToActionResult.ActionName);
+            } 
         }
+
+        [Fact]
+        public async Task POST_WorkViewForMarkerAddsFeedback()
+        {
+            //Arrange
+            String newFeedback = "This is useful example feedback";
+            int newMark = 60;
+            //ApplicationUser testOwner = new ApplicationUser();
+            Work testWork = new Work();
+            testWork.WorkID = 1;
+            testWork.Feedback = "Unconstructive feedback";
+            testWork.Mark = 10;
+            //List<Work> workList = new List<Work>(1);
+            //workList.Add(testWork);
+
+            //User
+            var userClaims = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
+            {
+                 new Claim(ClaimTypes.NameIdentifier, "5"),
+                 new Claim("Name", "Tea"),
+                 new Claim(ClaimTypes.Surname, "Cheery"),
+                 new Claim(ClaimTypes.Email, "some@email.com"),
+                 new Claim(ClaimTypes.Role, "Teacher")
+            }));
+            ApplicationUser user = new ApplicationUser();
+
+            //Create a HttpContext
+            var testHttpCtxt = new DefaultHttpContext() { User = userClaims };
+            //Create ActionExecutingContext.
+            var actionContext = new ActionContext(testHttpCtxt, new RouteData(), new ActionDescriptor(), new ModelStateDictionary());
+            var ListFilterMetaData = new List<IFilterMetadata>() { new Mock<IFilterMetadata>().Object };
+            var actionExecutingContext = new ActionExecutingContext(actionContext, ListFilterMetaData, new Dictionary<string, object>(), null);
+
+            //-Controller and database dependencies.
+            var m_userManager = new Mock<UserManager<ApplicationUser>>(userClaims, null, null, null, null, null, null, null, null);
+            m_userManager.Setup(um => um.GetUserAsync(userClaims)).ReturnsAsync<UserManager<ApplicationUser>, ApplicationUser>(user);
+
+            var m_works = new Mock<DbSet<Work>>();
+            m_works.Object.Add(testWork);
+
+            var m_dbContext = new Mock<ApplicationDbContext>();
+      //      m_dbContext.Setup(ctxt => ctxt.Works).Returns(m_works.Object);  //TODO breaks here, don't know how to proceed.
+      //      m_dbContext.Object.Works = m_works.Object;                      //This doesn't work either
+
+            var controller = new HomeController(m_userManager.Object, new LoggerFactory(), null, m_dbContext.Object, null);
+
+            //set to use mock context
+            var controllerContext = new ControllerContext(new ActionContext(
+                testHttpCtxt,
+                new RouteData(),
+                new Microsoft.AspNetCore.Mvc.Controllers.ControllerActionDescriptor(),
+                new ModelStateDictionary()));
+            controller.ControllerContext = controllerContext;
+
+            //Force use of ActionExectuing Context.
+            controller.OnActionExecuting(actionExecutingContext);
+
+            //Act
+            ViewResult result = (ViewResult) await controller.WorkViewForMarker(testWork.WorkID, newFeedback, newMark);
+
+            //Assert
+            Work retrievedWork = (Work) result.Model;
+            Assert.Equal(newFeedback, retrievedWork.Feedback);
+            Assert.Equal(newMark, retrievedWork.Mark);
+            Assert.Equal(user, retrievedWork.Marker);
+        }
+
     }
 }
