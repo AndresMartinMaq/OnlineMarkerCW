@@ -36,7 +36,7 @@ namespace OnlineMarkerCW.UnitTests.ObjectPrintHelper
 
         public ObjectPrinter(ITestOutputHelper output)   {this.output = output;}
 
-        //Use it with care, it might be not conistent with it's output, as it ignores the fields which launch expections wwhile searilizing
+        //Use it with care, it might be not conistent with it's output, as it ignores the fields which launch expections while searilizing
         public void printObject (object Object) {
             output.WriteLine(
               "Contents of {0} are {1}",

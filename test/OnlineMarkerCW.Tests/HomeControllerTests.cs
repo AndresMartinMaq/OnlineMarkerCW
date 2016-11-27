@@ -14,6 +14,9 @@ using System.Security.Principal;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.AspNetCore.Mvc.Abstractions;
+using Microsoft.AspNetCore.Mvc.Filters;
+using System.Collections.Generic;
 
 namespace OnlineMarkerCW.UnitTests.Controllers
 {
@@ -54,31 +57,42 @@ namespace OnlineMarkerCW.UnitTests.Controllers
             //-Controller
             var controller = new HomeController(null, new LoggerFactory(), null, null, null);
             //-User
-            var m_userClaims = new Mock<System.Security.Claims.ClaimsPrincipal>();
+            /*var m_userClaims = new Mock<System.Security.Claims.ClaimsPrincipal>();
             var m_Identity = new Mock<IIdentity>();
             m_Identity.Setup(identity => identity.IsAuthenticated).Returns(true);
             m_userClaims.Setup(u => u.Identity).Returns(m_Identity.Object);
-            m_userClaims.Setup(u => u.IsInRole("Student")).Returns(true);
-            //m_userClaims.Setup(u => u.FindFirstValue(ClaimTypes.Role)).Returns("Student"); //doesnt work
-            //-httpContext
-            var m_HtttpContext = new DefaultHttpContext() { User = m_userClaims.Object };
+            m_userClaims.Setup(u => u.IsInRole("Student")).Returns(true);*/
+            
+            //-User Alternative
+            var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
+            {
+                 new Claim(ClaimTypes.NameIdentifier, "1"),
+                 new Claim("Name", "Stuart"),
+                 new Claim(ClaimTypes.Surname, "Dent"),
+                 new Claim(ClaimTypes.Email, "some@email.com"),
+                 new Claim(ClaimTypes.Role, "Student")
+            }));
 
-            //var controllerContext = new ControllerContext(m_HtttpContext, new RouteData(), new ControllerBase());
+            //m_userClaims.Setup(u => u.FindFirstValue(ClaimTypes.Role)).Returns("Student"); //doesnt work
+            //Create a HttpContext
+            var testHttpCtxt = new DefaultHttpContext() { User = user };
+            //Create ActionExecutingContext.
+            var actionContext = new ActionContext(testHttpCtxt, new RouteData(), new ActionDescriptor(), new ModelStateDictionary());
+            var ListFilterMetaData = new List<IFilterMetadata>() { new Mock<IFilterMetadata>().Object };
+            var actionExecutingContext = new ActionExecutingContext(actionContext, ListFilterMetaData, new Dictionary<string, object>(), null);
+
+            //Set home controller to use mock context
             var controllerContext = new ControllerContext(new ActionContext(
-                m_HtttpContext, 
+                testHttpCtxt, 
                 new RouteData(), 
                 new Microsoft.AspNetCore.Mvc.Controllers.ControllerActionDescriptor(), 
                 new ModelStateDictionary()));
-            //controllerContext.Setup(t => t.HttpContext).Returns(m_HtttpContext);
-             //Set home controller to use mock context
-             controller.ControllerContext = controllerContext;
+            controller.ControllerContext = controllerContext;
 
-             //Create ActionExecutingContext.
-             /*var actionContext = new ActionContext(m_HtttpContext, new RouteData(), new ActionDescriptor(), new ModelStateDictionary());
-            var ListFilterMetaData = new List<IFilterMetadata>() { new Mock<IFilterMetadata>().Object };
-            var actionExecutingContext = new ActionExecutingContext(actionContext, ListFilterMetaData, new Dictionary<string, object>(), null);
-            //Initiate the filter*/
-            
+            //Force use of ActionExectuing Context.
+            controller.OnActionExecuting(actionExecutingContext);
+
+
             //Create fake student identity (User).
             //Method 1
             /*GenericIdentity fakeIdentity = new GenericIdentity("SomeUser");

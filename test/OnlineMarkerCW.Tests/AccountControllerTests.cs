@@ -95,7 +95,7 @@ namespace OnlineMarkerCW.UnitTests.Controllers
             output.WriteLine("Printing the Modelstate");
             output.WriteLine("#################################");
             objectPrinter.printObject(_accountController.ModelState.Values);
-            //Assert that view is returned and that name of it os Login and that ModelSate containts ErrorMessage neccesarry
+            //Assert that view is returned, that name of it is Login and that ModelSate containts ErrorMessage neccesarry
             var viewResult = Assert.IsType<ViewResult>(result);
                 //That is the way to access ModelErrorCollection from the modelSate
             var errorResulst = (_accountController.ModelState.Values.ToList()[0].Errors.Where(e => e.ErrorMessage == "Invalid login attempt.").Count() == 0) ? false : true;
