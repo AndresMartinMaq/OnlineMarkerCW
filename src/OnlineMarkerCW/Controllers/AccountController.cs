@@ -53,7 +53,7 @@ namespace OnlineMarkerCW.Controllers
         {
           //Generated a ViemModel instance so that a select list is created
           RegisterViewModel model = new RegisterViewModel();
-          return View(model);
+          return View("Register",model);
 
         }
 
@@ -132,6 +132,7 @@ namespace OnlineMarkerCW.Controllers
                     _logger.LogInformation(1, "User logged in and stulst is {result}", result);
                     if (Url.IsLocalUrl(returnUrl))
                       {
+                        _logger.LogInformation(1, "redirec to  {returnUrl}", returnUrl);
                         return Redirect(returnUrl);
                       }
                       return RedirectToAction(nameof(HomeController.Index), "Home");

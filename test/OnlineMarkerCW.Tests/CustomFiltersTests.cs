@@ -12,7 +12,7 @@ using Microsoft.AspNetCore.Mvc.ModelBinding;
 using System.Security.Claims;
 using System.Security.Principal;
 using OnlineMarkerCW.Filters;
-using OnlineMarkerCW.UnitTests.ObjectPrintHelper;
+using OnlineMarkerCW.UnitTests.ObjectOperationsHelper;
 
 namespace OnlineMarkerCW.UnitTests.Filters
 {
@@ -20,10 +20,10 @@ namespace OnlineMarkerCW.UnitTests.Filters
     {
       //Initiate the ouput print for the test if it fails, if test passes, no ouput is being printed.
       private readonly ITestOutputHelper output;
-      private ObjectPrinter objectPrinter;
+      private ObjectOperations objectOperations;
 
       public Filters_UnitTests(ITestOutputHelper output)  {
-        this.objectPrinter = new ObjectPrinter (output);
+        this.objectOperations = new ObjectOperations (output);
         this.output = output;}
 
          [Fact]
@@ -50,16 +50,16 @@ namespace OnlineMarkerCW.UnitTests.Filters
             output.WriteLine("#################################");
             output.WriteLine("Printing object before the filter");
             output.WriteLine("#################################");
-            objectPrinter.printObject(actionExecutingContext.HttpContext.Response.StatusCode);
-            objectPrinter.printObject(actionExecutingContext.HttpContext.Response.Headers);
+            objectOperations.printObject(actionExecutingContext.HttpContext.Response.StatusCode);
+            objectOperations.printObject(actionExecutingContext.HttpContext.Response.Headers);
             //Invoke the filter on actionExecutionContent
             _anonymousOnlyFilter.OnActionExecuting(actionExecutingContext);
             //Print the object after the filter applied
             output.WriteLine("#################################");
             output.WriteLine("Printing object after the filter");
             output.WriteLine("#################################");
-            objectPrinter.printObject(actionExecutingContext.HttpContext.Response.StatusCode);
-            objectPrinter.printObject(actionExecutingContext.HttpContext.Response.Headers);
+            objectOperations.printObject(actionExecutingContext.HttpContext.Response.StatusCode);
+            objectOperations.printObject(actionExecutingContext.HttpContext.Response.Headers);
             //**********
             //**Assert**
             //**********
@@ -86,14 +86,14 @@ namespace OnlineMarkerCW.UnitTests.Filters
             output.WriteLine("#################################");
             output.WriteLine("Printing object before the filter");
             output.WriteLine("#################################");
-            objectPrinter.printObject(actionExecutingContext);
+            objectOperations.printObject(actionExecutingContext);
             //Invoke the filter on actionExecutionContent
             _anonymousOnlyFilter.OnActionExecuting(actionExecutingContext);
             //Print the object after the filter applied
             output.WriteLine("#################################");
             output.WriteLine("Printing object after the filter");
             output.WriteLine("#################################");
-            objectPrinter.printObject(actionExecutingContext);
+            objectOperations.printObject(actionExecutingContext);
             //**********
             //**Assert**
             //**********

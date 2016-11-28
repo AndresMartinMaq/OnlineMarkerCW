@@ -10,14 +10,18 @@ AccountController_UnitTests:
 2. Login POST
 		when right details - @return1 URL - redirection happens
 		when right details - if no redirect url - @return2 home controller.
-		*check that sing in happens, if credentials are rigth, if not @return3 invalid attemnd
-		*verify through the singinManger Moch that sign happens.
-		*check modelstate - if it checks for right POST DATA, if its wrong @return4 current state
-
+		When wrong details, if not @return3 invalid attemnd
+		When ModelState is invalid,  @return4 is returned with modelstateErrors
+		
+			@(canttested, as they happen in the middleware which is invoked before the action is executed)
+					ModelView validation cannot be assessed in the controller.
 
 2. Register GET
-		*[NotLoggedIn] - no logedIn user can perform the action, return the home page.
-		*just @return1 the view() - with the right select list ?
+		*just @return1 the view(), it should have the right name.
+		
+					@(canttested, as they happen in the middleware which is invoked before the action is executed)
+						cannot access the viewresult Model properties, hence cannot test whats generated.
+
 
 
 3. Register POST - bring out the users claim to the dB seperae service, bring out the creatiing new user to dB services, bring out creating a new role to the services?
@@ -35,3 +39,6 @@ AccountController_UnitTests:
   *[ValidateAntiForgeryToken] token ?
   *verify through the singinManger Moch that signout out happens.
 	*home conrollers it returned
+
+---------- bugs found ---
+*login viewmodel email was not validated on the server correctly.

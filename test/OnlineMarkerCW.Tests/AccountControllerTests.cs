@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.AspNetCore.Http;
 using System.Security.Claims;
@@ -19,7 +20,7 @@ using OnlineMarkerCW.Models;
 using OnlineMarkerCW.ViewModels;
 using OnlineMarkerCW.Controllers;
 using OnlineMarkerCW.Interfaces;
-using OnlineMarkerCW.UnitTests.ObjectPrintHelper;
+using OnlineMarkerCW.UnitTests.ObjectOperationsHelper;
 
 namespace OnlineMarkerCW.UnitTests.Controllers
 {
@@ -28,7 +29,7 @@ namespace OnlineMarkerCW.UnitTests.Controllers
         private readonly AccountController _accountController;
         private readonly LoggerFactory _logger;
         private readonly ITestOutputHelper output;
-        private ObjectPrinter objectPrinter;
+        private ObjectOperations objectOperations;
         private Mock<UserManager<ApplicationUser>> m_userManager;
         private UserManager<ApplicationUser> userManager;
         private Mock<SignInManager<ApplicationUser>> m_signInManager;
@@ -39,7 +40,7 @@ namespace OnlineMarkerCW.UnitTests.Controllers
 
         public AccountController_UnitTests(ITestOutputHelper output)
          {
-             this.objectPrinter                 = new ObjectPrinter (output);
+             this.objectOperations                 = new ObjectOperations (output);
              this.output                        = output;
               _logger                           = new LoggerFactory();
               var m_actionContext               = new ActionContext();
@@ -69,7 +70,7 @@ namespace OnlineMarkerCW.UnitTests.Controllers
          }
 
          [Fact]
-         public void  GET_Login_IndexReturnsLoginView_WhenUserNotLoggedIN() {
+         public void  GET_Login_IndexReturnsLoginView() {
             //Arrange
             //Act
             var result = _accountController.Login();
@@ -77,6 +78,29 @@ namespace OnlineMarkerCW.UnitTests.Controllers
             var viewResult = Assert.IsType<ViewResult>(result);
             Assert.NotNull(viewResult);
             Assert.Equal(viewResult.ViewName, "Login");
+         }
+
+         [Fact]
+         //Model Validation happens out of the controller, before action is invoked, hence it cannot be tested in the unit test of the action. Only response to the ModelState.IsValid can be.
+         public async Task POST_Login_IndexReturnsLoginView_WhenModelStateinValid() {
+           //Arrange
+           var error_mess = "Email is field is Required";
+           var m_loginViewModel = new LoginViewModel() {Email = "", Password = "srthasasdas" };
+           _accountController.ModelState.AddModelError(string.Empty, error_mess);
+           //Act
+            var result = await _accountController.Login(m_loginViewModel);
+            output.WriteLine("#################################");
+            output.WriteLine("Printing the result");
+            output.WriteLine("#################################");
+            objectOperations.printObject(_accountController.ModelState);
+           //Assert that login view is returned back. Assert that ModelState contains errors. Asssert That validation State is percieved as invalid.
+           var viewResult = Assert.IsType<ViewResult>(result);
+           var errorResulst = (_accountController.ModelState.Values.ToList()[0].Errors.Where(e => e.ErrorMessage == error_mess).Count() == 0) ? false : true;
+
+           Assert.NotNull(viewResult);
+           Assert.Equal(viewResult.ViewName, "Login");
+           Assert.True(errorResulst);
+           Assert.Equal(_accountController.ModelState.GetValidationState(""), ModelValidationState.Invalid);
          }
 
          [Fact]
@@ -90,11 +114,11 @@ namespace OnlineMarkerCW.UnitTests.Controllers
             output.WriteLine("#################################");
             output.WriteLine("Printing the result");
             output.WriteLine("#################################");
-            objectPrinter.printObject(result);
+            objectOperations.printObject(result);
             output.WriteLine("#################################");
             output.WriteLine("Printing the Modelstate");
             output.WriteLine("#################################");
-            objectPrinter.printObject(_accountController.ModelState.Values);
+            objectOperations.printObject(_accountController.ModelState.Values);
             //Assert that view is returned, that name of it is Login and that ModelSate containts ErrorMessage neccesarry
             var viewResult = Assert.IsType<ViewResult>(result);
                 //That is the way to access ModelErrorCollection from the modelSate
@@ -105,22 +129,60 @@ namespace OnlineMarkerCW.UnitTests.Controllers
          }
 
          [Fact]
-         public async Task POST_Login_IndexReturnHomeIndex_WhenRightCredentianslandNoRedirectUrl() {
+         public async Task POST_Login_IndexReturnHomeIndex_WhenRightCredentialnsandNoReturnUrl() {
            //Arrange
            var m_loginViewModel = new LoginViewModel() {Email = "idontexist@anyhwere.com", Password = "cannotpossibliygowrongwiththisone1111" };
            var m_signInResult   = Microsoft.AspNetCore.Identity.SignInResult.Success; //	Returns a SignInResult that represents a successful sign-in.
-           m_signInManager.Setup(s => s.PasswordSignInAsync(m_loginViewModel.Email, m_loginViewModel.Password, false, false)).Returns(Task.FromResult(m_signInResult)); //async methods require Task object to be returned.
+           //m_signInManager.Setup(s => s.PasswordSignInAsync(m_loginViewModel.Email, m_loginViewModel.Password, false, false)).Returns(Task.FromResult(m_signInResult)); //async methods require Task object to be returned.
+           m_signInManager.Setup(s => s.PasswordSignInAsync(m_loginViewModel.Email, m_loginViewModel.Password, false, false)).ReturnsAsync(m_signInResult);
            //Act
            var result = await _accountController.Login(m_loginViewModel);
            output.WriteLine("#################################");
            output.WriteLine("Printing the result");
            output.WriteLine("#################################");
-           objectPrinter.printObject(result);
+           objectOperations.printObject(result);
            //Assert that controller redirects to homeIndex
            var redirectToActionResult = Assert.IsType<RedirectToActionResult>(result);
-               //That is the way to access ModelErrorCollection from the modelSate
            Assert.Equal("Home", redirectToActionResult.ControllerName);
            Assert.Equal("Index", redirectToActionResult.ActionName);
+         }
+
+         [Fact]
+         public async Task POST_Login_IndexReturnsRedirect_WhenRightCredentianls_withReturnURL() {
+           //Arrange
+           var returnUrl  = "/Home/About";
+           var m_loginViewModel = new LoginViewModel() {Email = "idontexist@anyhwere.com", Password = "cannotpossibliygowrongwiththisone1111" };
+           var m_signInResult   = Microsoft.AspNetCore.Identity.SignInResult.Success; //	Returns a SignInResult that represents a successful sign-in.
+           m_signInManager.Setup(s => s.PasswordSignInAsync(m_loginViewModel.Email, m_loginViewModel.Password, false, false)).ReturnsAsync(m_signInResult);
+           //Act
+           var result = await _accountController.Login(m_loginViewModel, returnUrl);
+           output.WriteLine("#################################");
+           output.WriteLine("Printing the result");
+           output.WriteLine("#################################");
+           objectOperations.printObject(result);
+           //Assert that redirect URL is the same as passed in.
+           var redirectResult = Assert.IsType<RedirectResult>(result);
+           Assert.Equal(returnUrl, redirectResult.Url);
+         }
+
+         [Fact]
+         public void  GET_Register_IndexReturnsLoginVieW() {
+            //Arrange
+            //Act
+            var result = _accountController.Register();
+            //Assert that view is returned and that name of it os Register.
+            var viewResult = Assert.IsType<ViewResult>(result);
+            var viewModel = viewResult.Model;
+            output.WriteLine("#################################");
+            output.WriteLine("Printing the ViewResult");
+            output.WriteLine("#################################");
+            objectOperations.printObject(viewModel);
+            Assert.NotNull(viewResult);
+            Assert.Equal(viewResult.ViewName, "Register");
+            // Cannot acces the Model from the viewresult, as it is defined just like an anonymous object without any properies, hence it cannot be tested in the controller
+            //Assert.NotNull(viewResult.Model.UserTypeList.Where(l => l.Text == "Student"));
+
+
          }
 
     }

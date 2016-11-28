@@ -28,7 +28,7 @@ namespace OnlineMarkerCW.ViewModels
 
       [Required]
       [DataType(DataType.EmailAddress)]
-      [Display(Name = "Email")]
+      [EmailAddress(ErrorMessage = "Invalid Email Address Format")]
       public string Email { get; set; }
       [Required]
       [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 2)]
@@ -60,11 +60,13 @@ namespace OnlineMarkerCW.ViewModels
 
     public class LoginViewModel
     {
-        [DataType(DataType.EmailAddress)]
         [Required]
+        [EmailAddress(ErrorMessage = "Invalid Email Address Format")]
+        [Display(Name = "Email")]
         public string Email { get; set; }
         [Required]
         [DataType(DataType.Password)]
+        [Display(Name = "Password")]
         [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
         public string Password { get; set; }
     }
