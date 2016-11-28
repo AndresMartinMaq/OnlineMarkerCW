@@ -13,7 +13,7 @@ namespace OnlineMarkerCW.Data
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) {}
 
         //public DbSet<User> Users { get; set; }
-        public DbSet<Work> Works { get; set; }
+        public virtual DbSet<Work> Works { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

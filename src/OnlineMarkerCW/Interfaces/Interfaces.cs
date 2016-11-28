@@ -25,6 +25,11 @@ namespace OnlineMarkerCW.Interfaces
 {
     public interface IDbServices
     {
-      Task<List<Work>> GetSubmitedWorks(ApplicationUser Owner);
+        Task<List<Work>> GetSubmitedWorks(ApplicationUser Owner);
+        Task<Work> GetWorkWithID(int id);
+        Task<List<Work>> GetWorksAndOwners();
+        void AddWork(Work work);
+        void RemoveWork(Work work);
+        void MarkWork(Work work, ApplicationUser marker, String feedback, int mark);
     }
 }

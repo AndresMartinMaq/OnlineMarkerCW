@@ -35,7 +35,7 @@ namespace OnlineMarkerCW.UnitTests.Controllers
         {
             // --Arrange--
             //-Controller
-            var controller = new HomeController(null, new LoggerFactory(), null, null, null);
+            var controller = new HomeController(null, new LoggerFactory(), null, null);
             //-User
             var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
             {
@@ -103,25 +103,24 @@ namespace OnlineMarkerCW.UnitTests.Controllers
             }));
             ApplicationUser user = new ApplicationUser();
 
-            //Create a HttpContext
-            var testHttpCtxt = new DefaultHttpContext() { User = userClaims };
+             //Create a HttpContext
+             var testHttpCtxt = new DefaultHttpContext() { User = userClaims };
             //Create ActionExecutingContext.
             var actionContext = new ActionContext(testHttpCtxt, new RouteData(), new ActionDescriptor(), new ModelStateDictionary());
             var ListFilterMetaData = new List<IFilterMetadata>() { new Mock<IFilterMetadata>().Object };
             var actionExecutingContext = new ActionExecutingContext(actionContext, ListFilterMetaData, new Dictionary<string, object>(), null);
 
             //-Controller and database dependencies.
-            var m_userManager = new Mock<UserManager<ApplicationUser>>(userClaims, null, null, null, null, null, null, null, null);
+            var m_IUserStore = new Mock<IUserStore<ApplicationUser>>();
+            var m_userManager = new Mock<UserManager<ApplicationUser>>(m_IUserStore.Object, null, null, null, null, null, null, null, null);
             m_userManager.Setup(um => um.GetUserAsync(userClaims)).ReturnsAsync<UserManager<ApplicationUser>, ApplicationUser>(user);
 
             var m_works = new Mock<DbSet<Work>>();
             m_works.Object.Add(testWork);
 
             var m_dbContext = new Mock<ApplicationDbContext>();
-      //      m_dbContext.Setup(ctxt => ctxt.Works).Returns(m_works.Object);  //TODO breaks here, don't know how to proceed.
-      //      m_dbContext.Object.Works = m_works.Object;                      //This doesn't work either
-
-            var controller = new HomeController(m_userManager.Object, new LoggerFactory(), null, m_dbContext.Object, null);
+            m_dbContext.Setup(ctxt => ctxt.Works).Returns(m_works.Object);
+            var controller = new HomeController(m_userManager.Object, new LoggerFactory(), null, null); //TODO
 
             //set to use mock context
             var controllerContext = new ControllerContext(new ActionContext(

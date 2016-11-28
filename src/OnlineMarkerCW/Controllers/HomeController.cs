@@ -35,8 +35,7 @@ namespace OnlineMarkerCW.Controllers
       private string user_role;
       private string user_ID;
       private IHostingEnvironment _hostingEnv;//required for serving uploaded files
-      private ApplicationDbContext _context;// db context for writing to the Works DB
-      private readonly IDbServices _dbServices;//dbservice methods.
+      private readonly IDbServices _dbServices;//dbservice methods. Contains db context.
 
       //if overriden, this method will be called for every action method in the class
       public override void OnActionExecuting(ActionExecutingContext filterContext)
@@ -54,14 +53,12 @@ namespace OnlineMarkerCW.Controllers
 
 
       //injest the controller with user manager, logger and hosting manger
-      public HomeController(UserManager<ApplicationUser> userManager,ILoggerFactory loggerFactory, IHostingEnvironment hostingEnv, ApplicationDbContext context, IDbServices dbServices)
+      public HomeController(UserManager<ApplicationUser> userManager,ILoggerFactory loggerFactory, IHostingEnvironment hostingEnv, IDbServices dbServices)
       {
           _userManager = userManager;
           _logger = loggerFactory.CreateLogger<HomeController>();
           _hostingEnv = hostingEnv;
-          _context = context;
           _dbServices = dbServices;
-
       }
 
       [HttpGet]
@@ -125,8 +122,7 @@ namespace OnlineMarkerCW.Controllers
                            work.FilePath = Path.Combine(uploads,  timeNow + "_" +  file.FileName);
                            work.SubmitDate = localDate;
                            work.Owner = user;
-                           _context.Works.Add(work);
-                           _context.SaveChanges();
+                           _dbServices.AddWork(work);
                            //save the file stream to the file
                            await file.CopyToAsync(fileStream);
                            ViewData["upload-message"] = "File upload sucessfull";
@@ -147,13 +143,12 @@ namespace OnlineMarkerCW.Controllers
        [ValidateAntiForgeryToken]
        [Authorize(Roles = "Student")]
        public async Task<IActionResult> WorkDelete(int ID)  {
-        var work =  await _context.Works.FirstOrDefaultAsync(w => w.WorkID == ID);
+        var work =  await _dbServices.GetWorkWithID(ID);
         var user = await _userManager.GetUserAsync(this.User);
         //check if owner is sending the request to delete
         if (work.Owner == user) {
-          _context.Works.Remove(work);
-          _context.SaveChanges();
-          System.IO.File.Delete(work.FilePath);
+            _dbServices.RemoveWork(work);
+            System.IO.File.Delete(work.FilePath);
         }
         return RedirectToAction(nameof(HomeController.MyWorks), "Home");
       }
@@ -161,7 +156,7 @@ namespace OnlineMarkerCW.Controllers
        [Authorize]
        [HttpGet]
        public async Task<IActionResult> WorkView(int ID)  {
-        var work = await _context.Works.FirstOrDefaultAsync(w => w.WorkID == ID);
+        var work = await _dbServices.GetWorkWithID(ID);
         var user = await _userManager.GetUserAsync(this.User);
         //check if owner or teacher tries to access the page
         if (work?.Owner == user || user_role == "Teacher") {
@@ -177,7 +172,7 @@ namespace OnlineMarkerCW.Controllers
         public async Task<IActionResult> MyMarkings()  {
             var user = await _userManager.GetUserAsync(this.User);
             //Include Owner tells the framework to load the foreign key field Owner, otherwise it will be null.
-            var model = await _context.Works.OrderBy(w => w.SubmitDate).Include(w => w.Owner).ToListAsync();
+            var model = await _dbServices.GetWorksAndOwners();
             return View(model);
         }
 
@@ -185,7 +180,7 @@ namespace OnlineMarkerCW.Controllers
         [HttpGet]
         public async Task<IActionResult> WorkViewForMarker(int ID)
         {
-            var work = await _context.Works.FirstOrDefaultAsync(w => w.WorkID == ID);
+            var work = await _dbServices.GetWorkWithID(ID);
             var user = await _userManager.GetUserAsync(this.User);
             //check if owner or teacher tries to access the page
             if (user_role == "Teacher"){
@@ -210,17 +205,11 @@ namespace OnlineMarkerCW.Controllers
             }
 
             //Write to db.
-            var work = await _context.Works.FirstOrDefaultAsync(w => w.WorkID == id);
+            var work = await _dbServices.GetWorkWithID(id);
             var user = await _userManager.GetUserAsync(this.User);
             if (ModelState.IsValid)
             {
-                _context.Update(work);
-                work.Marked = true;
-                work.MarkDate = DateTime.Now;
-                work.Feedback = feedback;
-                work.Mark = mark;
-                work.Marker = user;
-                _context.SaveChanges();
+                _dbServices.MarkWork(work, user, feedback, mark);
                 ViewData["update-confirmation-msg"] = "Feedback and Mark Updated Successfully";
             }
             return View(work);
