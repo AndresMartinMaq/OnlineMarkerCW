@@ -70,7 +70,7 @@ namespace OnlineMarkerCW.UnitTests.Controllers
          }
 
          [Fact]
-         public void  GET_Login_IndexReturnsLoginView() {
+         public void  GET_Login_ReturnsLoginView() {
             //Arrange
             //Act
             var result = _accountController.Login();
@@ -82,9 +82,9 @@ namespace OnlineMarkerCW.UnitTests.Controllers
 
          [Fact]
          //Model Validation happens out of the controller, before action is invoked, hence it cannot be tested in the unit test of the action. Only response to the ModelState.IsValid can be.
-         public async Task POST_Login_IndexReturnsLoginView_WhenModelStateinValid() {
+         public async Task POST_Login_ReturnsLoginView_WhenModelStateinValid() {
            //Arrange
-           var error_mess = "Email is field is Required";
+           var error_mess = "Email is field is Required.";
            var m_loginViewModel = new LoginViewModel() {Email = "", Password = "srthasasdas" };
            _accountController.ModelState.AddModelError(string.Empty, error_mess);
            //Act
@@ -104,7 +104,7 @@ namespace OnlineMarkerCW.UnitTests.Controllers
          }
 
          [Fact]
-         public async Task POST_Login_IndexReturnsLoginView_WhenWrongCredentials() {
+         public async Task POST_Login_ReturnsLoginView_WhenWrongCredentials() {
             //Arrange
             var m_loginViewModel = new LoginViewModel() {Email = "idontexist@anyhwere.com", Password = "cannotpossibliygowrongwiththisone1111" };
             var m_signInResult   = Microsoft.AspNetCore.Identity.SignInResult.Failed; //	Returns a SignInResult that represents a failed sign-in.
@@ -126,10 +126,11 @@ namespace OnlineMarkerCW.UnitTests.Controllers
             Assert.NotNull(viewResult);
             Assert.Equal(viewResult.ViewName, "Login");
             Assert.True(errorResulst);
+            Assert.Equal(_accountController.ModelState.GetValidationState(""), ModelValidationState.Invalid);
          }
 
          [Fact]
-         public async Task POST_Login_IndexReturnHomeIndex_WhenRightCredentialnsandNoReturnUrl() {
+         public async Task POST_Login_ReturnHomeIndex_WhenRightCredentialnsandNoReturnUrl() {
            //Arrange
            var m_loginViewModel = new LoginViewModel() {Email = "idontexist@anyhwere.com", Password = "cannotpossibliygowrongwiththisone1111" };
            var m_signInResult   = Microsoft.AspNetCore.Identity.SignInResult.Success; //	Returns a SignInResult that represents a successful sign-in.
@@ -148,7 +149,7 @@ namespace OnlineMarkerCW.UnitTests.Controllers
          }
 
          [Fact]
-         public async Task POST_Login_IndexReturnsRedirect_WhenRightCredentianls_withReturnURL() {
+         public async Task POST_Login_ReturnsRedirect_WhenRightCredentianls_withReturnURL() {
            //Arrange
            var returnUrl  = "/Home/About";
            var m_loginViewModel = new LoginViewModel() {Email = "idontexist@anyhwere.com", Password = "cannotpossibliygowrongwiththisone1111" };
@@ -166,7 +167,7 @@ namespace OnlineMarkerCW.UnitTests.Controllers
          }
 
          [Fact]
-         public void  GET_Register_IndexReturnsLoginVieW() {
+         public void  GET_Register_ReturnsLoginVieW() {
             //Arrange
             //Act
             var result = _accountController.Register();
@@ -181,8 +182,122 @@ namespace OnlineMarkerCW.UnitTests.Controllers
             Assert.Equal(viewResult.ViewName, "Register");
             // Cannot acces the Model from the viewresult, as it is defined just like an anonymous object without any properies, hence it cannot be tested in the controller
             //Assert.NotNull(viewResult.Model.UserTypeList.Where(l => l.Text == "Student"));
+         }
 
+         [Fact]
+         public async Task POST_Register_ReturnsLoginView_WhenModelStateinValid() {
+           //Arrange
+           var error_mess = "Name is field is Required.";
+           var m_registerViewModel = new RegisterViewModel() {     Email = "test@test.com",   Name  = "TestPersonName",   Surname = "TestPersonSurname",   Password = "testPassword1234",     ConfirmPassword  = "testPassword1234",    UserTypeID = 0};
 
+           _accountController.ModelState.AddModelError(string.Empty, error_mess);
+           //Act
+            var result = await _accountController.Register(m_registerViewModel);
+            output.WriteLine("#################################");
+            output.WriteLine("Printing the result");
+            output.WriteLine("#################################");
+            objectOperations.printObject(_accountController.ModelState);
+           //Assert that Register view is returned back. Assert that ModelState contains errors. Asssert That validation State is percieved as invalid.
+           var viewResult = Assert.IsType<ViewResult>(result);
+           var errorResulst = (_accountController.ModelState.Values.ToList()[0].Errors.Where(e => e.ErrorMessage == error_mess).Count() == 0) ? false : true;
+
+           Assert.NotNull(viewResult);
+           Assert.Equal(viewResult.ViewName, "Register");
+           Assert.True(errorResulst);
+           Assert.Equal(_accountController.ModelState.GetValidationState(""), ModelValidationState.Invalid);
+         }
+
+         [Fact]
+         public async Task POST_Register_ReturnsLoginView_WhenRegisterFails() {
+           //Arrange
+           var m_registerViewModel = new RegisterViewModel() { Email = "test@test.com",   Name  = "TestPersonName",   Surname = "TestPersonSurname",   Password = "testPassword1234",     ConfirmPassword  = "testPassword1234",    UserTypeID = 0};
+           var user = new ApplicationUser() {UserName = m_registerViewModel.Email, Email = m_registerViewModel.Email, Name = m_registerViewModel.Name, Surname = m_registerViewModel.Surname};
+           var error_msg = "Registration Has Failed";
+           var m_identityError = new IdentityError() {Code = "1", Description = error_msg};
+           var m_RegisterResult   =  Microsoft.AspNetCore.Identity.IdentityResult.Failed(m_identityError); //	Returns a m_RegisterResult that represents a failed registration.
+           m_userManager.Setup(u => u.CreateAsync(It.Is<ApplicationUser>(i => i.UserName == user.UserName), m_registerViewModel.Password)).ReturnsAsync(m_RegisterResult);//cannot mock for an objcet argument for CreateAsync, need to compared property be proeprty of the object.
+           //m_userManager.Setup(u => u.CreateAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>())).ReturnsAsync(m_RegisterResult);
+           //Act
+            var result = await _accountController.Register(m_registerViewModel);
+            output.WriteLine("#################################");
+            output.WriteLine("Printing the result");
+            output.WriteLine("#################################");
+            objectOperations.printObject(result);
+            objectOperations.printObject(_accountController.ModelState);
+           //Assert that Register view is returned back. Assert that ModelState contains errors. Asssert That validation State is percieved as invalid.
+           var viewResult = Assert.IsType<ViewResult>(result);
+           var errorResulst = (_accountController.ModelState.Values.ToList()[0].Errors.Where(e => e.ErrorMessage == error_msg).Count() == 0) ? false : true;
+           Assert.NotNull(viewResult);
+           Assert.Equal(viewResult.ViewName, "Register");
+           Assert.True(errorResulst);
+           Assert.Equal(_accountController.ModelState.GetValidationState(""), ModelValidationState.Invalid);
+         }
+
+         [Fact]
+         public async Task POST_Register_ReturnsLoginView_WhenRoleCreationFails() {
+           //Arrange
+           var error_msg = "Role Creation Has Failed";
+           var userType = "Student";
+           var m_registerViewModel = new RegisterViewModel() { Email = "test@test.com",   Name  = "TestPersonName",   Surname = "TestPersonSurname",   Password = "testPassword1234",     ConfirmPassword  = "testPassword1234",    UserTypeID = 0};
+           var user = new ApplicationUser() {UserName = m_registerViewModel.Email, Email = m_registerViewModel.Email, Name = m_registerViewModel.Name, Surname = m_registerViewModel.Surname};
+           var role = new ApplicationUserRole() { Name = userType, Description = userType};
+           var m_RegisterResult   =  Microsoft.AspNetCore.Identity.IdentityResult.Success; //	Returns a m_RegisterResult that represents a sucesfull registration.
+           var m_identityError = new IdentityError() {Code = "1", Description = error_msg};
+           var m_roleCreateResult   =  Microsoft.AspNetCore.Identity.IdentityResult.Failed(m_identityError); //Returns an error for role create result
+           m_userManager.Setup(u => u.CreateAsync(It.Is<ApplicationUser>(i => i.UserName == user.UserName), m_registerViewModel.Password)).ReturnsAsync(m_RegisterResult);
+           m_roleManager.Setup(r => r.RoleExistsAsync(userType)).ReturnsAsync(false);
+           m_roleManager.Setup(r => r.CreateAsync(It.Is<ApplicationUserRole>(i => i.Name == role.Name))).ReturnsAsync(m_roleCreateResult);
+           //Act
+            var result = await _accountController.Register(m_registerViewModel);
+            output.WriteLine("#################################");
+            output.WriteLine("Printing the result");
+            output.WriteLine("#################################");
+            objectOperations.printObject(result);
+            objectOperations.printObject(_accountController.ModelState);
+           //Assert that Register view is returned back. Assert that ModelState contains errors. Asssert That validation State is percieved as invalid.
+           var viewResult = Assert.IsType<ViewResult>(result);
+           var errorResulst = (_accountController.ModelState.Values.ToList()[0].Errors.Where(e => e.ErrorMessage == error_msg).Count() == 0) ? false : true;
+           Assert.NotNull(viewResult);
+           Assert.Equal(viewResult.ViewName, "Register");
+           Assert.True(errorResulst);
+           Assert.Equal(_accountController.ModelState.GetValidationState(""), ModelValidationState.Invalid);
+         }
+
+         [Theory]
+         [InlineData(true)]
+         [InlineData(false)]
+         public async Task POST_Register_RedirectHomeIndex_WhenRegiserSucceeds(bool roleExists) {
+           //Arrange
+           var userType = "Student";
+           var m_registerViewModel = new RegisterViewModel() { Email = "test@test.com",   Name  = "TestPersonName",   Surname = "TestPersonSurname",   Password = "testPassword1234",     ConfirmPassword  = "testPassword1234",    UserTypeID = 0};
+           var user = new ApplicationUser() {UserName = m_registerViewModel.Email, Email = m_registerViewModel.Email, Name = m_registerViewModel.Name, Surname = m_registerViewModel.Surname};
+           var role = new ApplicationUserRole() { Name = userType, Description = userType};
+           var m_RegisterResult   =  Microsoft.AspNetCore.Identity.IdentityResult.Success; //	Returns a m_RegisterResult that represents a sucesfull registration.
+           var m_roleCreateResult   = Microsoft.AspNetCore.Identity.IdentityResult.Success; // Returns a m_RegisterResult that represents a sucesfull role creation.
+           m_userManager.Setup(u => u.CreateAsync(It.Is<ApplicationUser>(i => i.UserName == user.UserName), m_registerViewModel.Password)).ReturnsAsync(m_RegisterResult);
+           m_roleManager.Setup(r => r.RoleExistsAsync(userType)).ReturnsAsync(roleExists);
+           m_roleManager.Setup(r => r.CreateAsync(It.Is<ApplicationUserRole>(i => i.Name == role.Name))).ReturnsAsync(m_roleCreateResult);
+           //Act
+          var result = await _accountController.Register(m_registerViewModel);
+          output.WriteLine("#################################");
+          output.WriteLine("Printing the result");
+          output.WriteLine("#################################");
+          objectOperations.printObject(result);
+          //Assert that controller redirects to homeIndex
+          var redirectToActionResult = Assert.IsType<RedirectToActionResult>(result);
+          Assert.Equal("Home", redirectToActionResult.ControllerName);
+          Assert.Equal("Index", redirectToActionResult.ActionName);
+         }
+
+         [Fact]
+         public async Task  POST_Logout_ReturnsLoginView() {
+            //Arrange
+            //Act
+            var result = await _accountController.Logout();
+            //Assert that view is returned and that name of it os Login.
+            var redirectToActionResult = Assert.IsType<RedirectToActionResult>(result);
+            Assert.Equal("Account", redirectToActionResult.ControllerName);
+            Assert.Equal("Login", redirectToActionResult.ActionName);
          }
 
     }

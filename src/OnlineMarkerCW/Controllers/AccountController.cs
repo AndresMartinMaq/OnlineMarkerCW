@@ -83,11 +83,11 @@ namespace OnlineMarkerCW.Controllers
                           ApplicationUserRole role = new ApplicationUserRole();
                           role.Name = userType;
                           role.Description = userType;
-                          IdentityResult roleResult = _roleManager.CreateAsync(role).Result;
+                          var roleResult = _roleManager.CreateAsync(role).Result;
                           if(!roleResult.Succeeded)
                           {
                             AddErrors(roleResult);
-                            return View(model);
+                            return View("Register",model);
                           }
                       }
                     //log things into session
@@ -112,7 +112,7 @@ namespace OnlineMarkerCW.Controllers
             }
 
             // If there is a fail, redisplay the form.
-            return View(model);
+            return View("Register",model);
         }
 
         //POST: /Account/Login
@@ -159,7 +159,7 @@ namespace OnlineMarkerCW.Controllers
             await _signInManager.SignOutAsync();
             _logger.LogInformation(4, "User logged out.");
             //HttpContext.Session.Abandon();
-            return RedirectToAction(nameof(HomeController.Index), "Home");
+            return RedirectToAction(nameof(AccountController.Login), "Account");
         }
 
         public IActionResult AccessDenied()

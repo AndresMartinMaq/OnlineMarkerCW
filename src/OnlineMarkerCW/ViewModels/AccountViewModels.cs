@@ -28,7 +28,7 @@ namespace OnlineMarkerCW.ViewModels
 
       [Required]
       [DataType(DataType.EmailAddress)]
-      [EmailAddress(ErrorMessage = "Invalid Email Address Format")]
+      [EmailAddress(ErrorMessage = "Invalid Email Address Format.")]
       public string Email { get; set; }
       [Required]
       [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 2)]
@@ -46,11 +46,12 @@ namespace OnlineMarkerCW.ViewModels
       [Required]
       [DataType(DataType.Password)]
       [Display(Name = "Confirm Password")]
+      [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
       [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
       public string ConfirmPassword { get; set; }
       //[Required]
       [Display(Name = "User Type")]
-      [Range (0,1, ErrorMessage = "The type should be either a student or a teacher")]
+      [Range (0,1, ErrorMessage = "The type should be either a student or a teacher.")]
       public int UserTypeID { get; set; }
 
       //list for generating the user type for list selection
@@ -61,7 +62,7 @@ namespace OnlineMarkerCW.ViewModels
     public class LoginViewModel
     {
         [Required]
-        [EmailAddress(ErrorMessage = "Invalid Email Address Format")]
+        [EmailAddress(ErrorMessage = "Invalid Email Address Format.")]
         [Display(Name = "Email")]
         public string Email { get; set; }
         [Required]
