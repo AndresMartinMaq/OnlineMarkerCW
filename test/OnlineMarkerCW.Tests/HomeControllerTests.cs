@@ -79,6 +79,55 @@ namespace OnlineMarkerCW.UnitTests.Controllers
             } 
         }
 
+        [Fact]
+        public async Task GET_MyWorks() {
+            // --Arrange--
+
+            //User
+            ApplicationUser user = new ApplicationUser();
+            var userClaims = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
+            {
+                 new Claim(ClaimTypes.NameIdentifier, "1"),
+                 new Claim("Name", "Alice"),
+                 new Claim(ClaimTypes.Surname, "Dent"),
+                 new Claim(ClaimTypes.Email, "some@email.com"),
+                 new Claim(ClaimTypes.Role, "Student")
+            }));
+            //Works, example list with 3 works.
+            List<Work> works = new List<Work>(3);
+            for (int i = 1; i < 4; i++) {
+                Work w = new Work();
+                w.WorkID = i*11;
+                w.Owner = user;
+                works.Add(w);
+            }
+
+            //Controller and database dependencies.
+            //--userManager
+            var m_IUserStore = new Mock<IUserStore<ApplicationUser>>();
+            var m_userManager = new Mock<UserManager<ApplicationUser>>(m_IUserStore.Object, null, null, null, null, null, null, null, null);
+            m_userManager.Setup(um => um.GetUserAsync(userClaims)).ReturnsAsync<UserManager<ApplicationUser>, ApplicationUser>(user);
+            //--dbServices
+            var m_dbServices = new Mock<IDbServices>();
+            m_dbServices.Setup(dbs => dbs.GetSubmitedWorks(user)).ReturnsAsync(works);
+            //--Controller creation
+            var controller = new HomeController(m_userManager.Object, new LoggerFactory(), null, m_dbServices.Object);
+
+            //Set home controller to use context with mock user
+            var controllerContext = new ControllerContext(new ActionContext(
+                new DefaultHttpContext() { User = userClaims },
+                new RouteData(),
+                new Microsoft.AspNetCore.Mvc.Controllers.ControllerActionDescriptor(),
+                new ModelStateDictionary()));
+            controller.ControllerContext = controllerContext;
+
+            // Act
+            ViewResult result = (ViewResult) await controller.MyWorks();
+
+            // Assert
+            Assert.Equal(works, result.Model);
+        }
+
         [Theory]
         [InlineData(60)]    //Marks must be between 0 and 100 to be accepted.
         [InlineData(223)]
@@ -104,13 +153,6 @@ namespace OnlineMarkerCW.UnitTests.Controllers
             }));
             ApplicationUser user = new ApplicationUser();
 
-            //Create a HttpContext
-            var testHttpCtxt = new DefaultHttpContext() { User = userClaims };
-            //Create ActionExecutingContext.
-            var actionContext = new ActionContext(testHttpCtxt, new RouteData(), new ActionDescriptor(), new ModelStateDictionary());
-            var ListFilterMetaData = new List<IFilterMetadata>() { new Mock<IFilterMetadata>().Object };
-            var actionExecutingContext = new ActionExecutingContext(actionContext, ListFilterMetaData, new Dictionary<string, object>(), null);
-
             //Controller and database dependencies.
             //--userManager
             var m_IUserStore = new Mock<IUserStore<ApplicationUser>>();
@@ -132,9 +174,9 @@ namespace OnlineMarkerCW.UnitTests.Controllers
             //--Controller creation
             var controller = new HomeController(m_userManager.Object, new LoggerFactory(), null, m_dbServices.Object);
 
-            //set to use mock context
+            //Set home controller to use context with mock user
             var controllerContext = new ControllerContext(new ActionContext(
-                testHttpCtxt,
+                new DefaultHttpContext() { User = userClaims },
                 new RouteData(),
                 new Microsoft.AspNetCore.Mvc.Controllers.ControllerActionDescriptor(),
                 new ModelStateDictionary()));
