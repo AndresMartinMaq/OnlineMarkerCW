@@ -201,6 +201,8 @@ namespace OnlineMarkerCW.Controllers
             //string feedbackEncoded = HtmlEncoder.Default.Encode(feedback); isn't necessary, the framework seems to take care of injections here.
             if (mark > 100 || mark < 0)
             {
+                //This would have been prevented by client validation, meaning that if we reach this state, the user messed with the request or html.
+                //Therefore, we didn't implement a "nice" explicit error reporting and we will just return the original page.
                 ModelState.AddModelError("Mark Error", "Mark should be a number from 0 to 100.");
             }
 

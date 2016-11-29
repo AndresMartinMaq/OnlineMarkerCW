@@ -16,6 +16,7 @@ using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.Filters;
 using System.Collections.Generic;
 using OnlineMarkerCW.Interfaces;
+using System.Linq;
 
 namespace OnlineMarkerCW.UnitTests.Controllers
 {
@@ -78,16 +79,19 @@ namespace OnlineMarkerCW.UnitTests.Controllers
             } 
         }
 
-        [Fact]
-        public async Task POST_WorkViewForMarkerUpdatesWorkWithFeedbackAndMark()
+        [Theory]
+        [InlineData(60)]    //Marks must be between 0 and 100 to be accepted.
+        [InlineData(223)]
+        [InlineData(-6)]
+        public async Task POST_WorkViewForMarkerUpdatesWorkWithFeedbackAndMark(int newMark)
         {
             //Arrange
             String newFeedback = "This is useful example feedback";
-            int newMark = 60;
+            String oldFeedback = "Unconstructive feedback";
             Work testWork = new Work();
-                testWork.WorkID = 1;
-                testWork.Feedback = "Unconstructive feedback";
-                testWork.Mark = 10;
+            testWork.WorkID = 1;
+            testWork.Feedback = oldFeedback;
+            testWork.Mark = 10;
 
             //User (Teacher-Marker)
             var userClaims = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
@@ -100,8 +104,8 @@ namespace OnlineMarkerCW.UnitTests.Controllers
             }));
             ApplicationUser user = new ApplicationUser();
 
-             //Create a HttpContext
-             var testHttpCtxt = new DefaultHttpContext() { User = userClaims };
+            //Create a HttpContext
+            var testHttpCtxt = new DefaultHttpContext() { User = userClaims };
             //Create ActionExecutingContext.
             var actionContext = new ActionContext(testHttpCtxt, new RouteData(), new ActionDescriptor(), new ModelStateDictionary());
             var ListFilterMetaData = new List<IFilterMetadata>() { new Mock<IFilterMetadata>().Object };
@@ -116,7 +120,7 @@ namespace OnlineMarkerCW.UnitTests.Controllers
             var m_dbServices = new Mock<IDbServices>();
             m_dbServices.Setup(dbs => dbs.GetWorkWithID(testWork.WorkID)).ReturnsAsync(testWork);
             m_dbServices.Setup(dbs => dbs.MarkWork(testWork, user, newFeedback, newMark))
-                .Callback((Work w, ApplicationUser u, String fb, int m) => 
+                .Callback((Work w, ApplicationUser u, String fb, int m) =>
                 {
                     w.Feedback = fb;
                     w.Mark = m;
@@ -124,7 +128,7 @@ namespace OnlineMarkerCW.UnitTests.Controllers
                     w.Marker = u;
                     w.Marked = true;
                 });
-            
+
             //--Controller creation
             var controller = new HomeController(m_userManager.Object, new LoggerFactory(), null, m_dbServices.Object);
 
@@ -137,14 +141,23 @@ namespace OnlineMarkerCW.UnitTests.Controllers
             controller.ControllerContext = controllerContext;
 
             //Act
-            ViewResult result = (ViewResult) await controller.WorkViewForMarker(testWork.WorkID, newFeedback, newMark);
+            ViewResult result = (ViewResult)await controller.WorkViewForMarker(testWork.WorkID, newFeedback, newMark);
 
             //Assert
-            Work retrievedWork = (Work) result.Model;
-            Assert.True(retrievedWork.Marked);
-            Assert.Equal(newFeedback, retrievedWork.Feedback);
-            Assert.Equal(newMark, retrievedWork.Mark);
-            Assert.Equal(user, retrievedWork.Marker);
+            Work retrievedWork = (Work)result.Model;
+            if (newMark < 0 || 100 < newMark){
+                Assert.Equal(false, controller.ModelState.IsValid);
+                Assert.True(controller.ModelState.Values.ToList()[0].Errors.Where(e => e.ErrorMessage == "Mark should be a number from 0 to 100.").Count() == 1);
+                //Assert.Equal(ModelValidationState.Invalid, controller.ModelState.GetValidationState(""));
+                Assert.False(retrievedWork.Marked);
+                Assert.Equal(oldFeedback, retrievedWork.Feedback);
+            } else { 
+                //Work should have been marked correctly
+                Assert.True(retrievedWork.Marked);
+                Assert.Equal(newFeedback, retrievedWork.Feedback);
+                Assert.Equal(newMark, retrievedWork.Mark);
+                Assert.Equal(user, retrievedWork.Marker);
+            }
         }
 
     }
