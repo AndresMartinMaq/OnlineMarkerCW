@@ -15,7 +15,7 @@ using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.Filters;
 using System.Collections.Generic;
-using OnlineMarkerCW.Data;
+using OnlineMarkerCW.Interfaces;
 
 namespace OnlineMarkerCW.UnitTests.Controllers
 {
@@ -79,20 +79,17 @@ namespace OnlineMarkerCW.UnitTests.Controllers
         }
 
         [Fact]
-        public async Task POST_WorkViewForMarkerAddsFeedback()
+        public async Task POST_WorkViewForMarkerUpdatesWorkWithFeedbackAndMark()
         {
             //Arrange
             String newFeedback = "This is useful example feedback";
             int newMark = 60;
-            //ApplicationUser testOwner = new ApplicationUser();
             Work testWork = new Work();
-            testWork.WorkID = 1;
-            testWork.Feedback = "Unconstructive feedback";
-            testWork.Mark = 10;
-            //List<Work> workList = new List<Work>(1);
-            //workList.Add(testWork);
+                testWork.WorkID = 1;
+                testWork.Feedback = "Unconstructive feedback";
+                testWork.Mark = 10;
 
-            //User
+            //User (Teacher-Marker)
             var userClaims = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
             {
                  new Claim(ClaimTypes.NameIdentifier, "5"),
@@ -110,17 +107,26 @@ namespace OnlineMarkerCW.UnitTests.Controllers
             var ListFilterMetaData = new List<IFilterMetadata>() { new Mock<IFilterMetadata>().Object };
             var actionExecutingContext = new ActionExecutingContext(actionContext, ListFilterMetaData, new Dictionary<string, object>(), null);
 
-            //-Controller and database dependencies.
+            //Controller and database dependencies.
+            //--userManager
             var m_IUserStore = new Mock<IUserStore<ApplicationUser>>();
             var m_userManager = new Mock<UserManager<ApplicationUser>>(m_IUserStore.Object, null, null, null, null, null, null, null, null);
             m_userManager.Setup(um => um.GetUserAsync(userClaims)).ReturnsAsync<UserManager<ApplicationUser>, ApplicationUser>(user);
-
-            var m_works = new Mock<DbSet<Work>>();
-            m_works.Object.Add(testWork);
-
-            var m_dbContext = new Mock<ApplicationDbContext>();
-            m_dbContext.Setup(ctxt => ctxt.Works).Returns(m_works.Object);
-            var controller = new HomeController(m_userManager.Object, new LoggerFactory(), null, null); //TODO
+            //--dbServices
+            var m_dbServices = new Mock<IDbServices>();
+            m_dbServices.Setup(dbs => dbs.GetWorkWithID(testWork.WorkID)).ReturnsAsync(testWork);
+            m_dbServices.Setup(dbs => dbs.MarkWork(testWork, user, newFeedback, newMark))
+                .Callback((Work w, ApplicationUser u, String fb, int m) => 
+                {
+                    w.Feedback = fb;
+                    w.Mark = m;
+                    w.MarkDate = DateTime.Now;
+                    w.Marker = u;
+                    w.Marked = true;
+                });
+            
+            //--Controller creation
+            var controller = new HomeController(m_userManager.Object, new LoggerFactory(), null, m_dbServices.Object);
 
             //set to use mock context
             var controllerContext = new ControllerContext(new ActionContext(
@@ -130,14 +136,12 @@ namespace OnlineMarkerCW.UnitTests.Controllers
                 new ModelStateDictionary()));
             controller.ControllerContext = controllerContext;
 
-            //Force use of ActionExectuing Context.
-            controller.OnActionExecuting(actionExecutingContext);
-
             //Act
             ViewResult result = (ViewResult) await controller.WorkViewForMarker(testWork.WorkID, newFeedback, newMark);
 
             //Assert
             Work retrievedWork = (Work) result.Model;
+            Assert.True(retrievedWork.Marked);
             Assert.Equal(newFeedback, retrievedWork.Feedback);
             Assert.Equal(newMark, retrievedWork.Mark);
             Assert.Equal(user, retrievedWork.Marker);
