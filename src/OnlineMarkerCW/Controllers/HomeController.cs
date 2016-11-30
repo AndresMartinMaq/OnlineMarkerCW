@@ -89,7 +89,7 @@ namespace OnlineMarkerCW.Controllers
         public async Task<IActionResult> MyWorks() {
           var user = await _userManager.GetUserAsync(this.User);
           var model = await _dbServices.GetSubmitedWorks(user);
-          return View(model);
+          return View("MyWorks",model);
         }
 
        [HttpPost]
@@ -97,8 +97,9 @@ namespace OnlineMarkerCW.Controllers
        [Authorize(Roles = "Student")]
        //Changed the task from async to a synchrounous one, as without using ajax the sucesfull upload message cannot be sent through before the view is generated.
        //http://dotnetthoughts.net/file-upload-in-asp-net-5-and-mvc-6/
-       public async Task<IActionResult> MyWorks(IFormFile file)
+       public async Task<IActionResult> MyWorks(MyWorksViewModel viewModel)
        {
+         var file = viewModel.File;
          DateTime localDate = DateTime.Now;
          string timeNow = localDate.ToString("yyyyMMddHHmmss");
          string upload_string = "html_uploads/"  + user_ID;
@@ -111,32 +112,36 @@ namespace OnlineMarkerCW.Controllers
          }
             var user = await _userManager.GetUserAsync(this.User);
             _logger.LogWarning(0, "I am getting the user") ;
+          //check the modelstate
+          if (ModelState.IsValid) {
            //check that file is not empty and in the right extension
-             if (file != null && file.Length > 0 &&  file.FileName.EndsWith(".html")) {
-                       using (var fileStream = new FileStream(Path.Combine(uploads,  timeNow + "_" +  file.FileName), FileMode.Create))
-                       {
-                         try  {
-                           //save a db entry to the db
-                           Work work = new Work ();
-                           work.FileName = file.FileName;
-                           work.FilePath = Path.Combine(uploads,  timeNow + "_" +  file.FileName);
-                           work.SubmitDate = localDate;
-                           work.Owner = user;
-                           _dbServices.AddWork(work);
-                           //save the file stream to the file
-                           await file.CopyToAsync(fileStream);
-                           ViewData["upload-message"] = "File upload sucessfull";
-                        } catch (Exception ex) {
-                          ViewData["error"] = "Upload failed: " +ex.Message.ToString(); // FIXME change to the modelstate mechanism. Perhaps change back to the async
-                        }
-                     }
+               if (file != null && file.Length > 0 &&  file.FileName.EndsWith(".html")) {
+                         using (var fileStream = new FileStream(Path.Combine(uploads,  timeNow + "_" +  file.FileName), FileMode.Create))
+                         {
+                           try  {
+                             //save a db entry to the db
+                             Work work = new Work ();
+                             work.FileName = file.FileName;
+                             work.FilePath = Path.Combine(uploads,  timeNow + "_" +  file.FileName);
+                             work.SubmitDate = localDate;
+                             work.Owner = user;
+                             _dbServices.AddWork(work);
+                             //save the file stream to the file
+                             await file.CopyToAsync(fileStream);
+                             ViewData["upload-message"] = "File upload sucessfull";
+                          } catch (Exception ex) {
+                            ModelState.AddModelError("File", "Upload failed: " +ex.Message.ToString());
+                          }
+                       }
+                }
+                //Upload failed, please try again and  check the file size and extention
+                else {
+                  ModelState.AddModelError("File",  "Upload failed, please try again, don't forget to check the file size and extension.");
+                }
               }
-              //Upload failed, please try again and  check the file size and extention
-              else {
-                ViewData["error"] = "Upload failed, please try again, don't forget to check the file size and extension.";
-              }
+
               var model = await _dbServices.GetSubmitedWorks(user);
-              return View(model);
+              return View("MyWorks", model);
        }
 
        [HttpPost]
@@ -160,7 +165,7 @@ namespace OnlineMarkerCW.Controllers
         var user = await _userManager.GetUserAsync(this.User);
         //check if owner or teacher tries to access the page
         if (work?.Owner == user || user_role == "Teacher") {
-           return View(work);
+           return View("MyWork",work);
         } else {
           return Redirect("/Error_Message/403");
         }
@@ -173,7 +178,7 @@ namespace OnlineMarkerCW.Controllers
             var user = await _userManager.GetUserAsync(this.User);
             //Include Owner tells the framework to load the foreign key field Owner, otherwise it will be null.
             var model = await _dbServices.GetWorksAndOwners();
-            return View(model);
+            return View("MyMarkings",model);
         }
 
         [Authorize(Roles = "Teacher")]

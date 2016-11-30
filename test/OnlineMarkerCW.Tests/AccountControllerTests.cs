@@ -173,15 +173,16 @@ namespace OnlineMarkerCW.UnitTests.Controllers
             var result = _accountController.Register();
             //Assert that view is returned and that name of it os Register.
             var viewResult = Assert.IsType<ViewResult>(result);
-            var viewModel = viewResult.Model;
+            RegisterViewModel viewModel = (RegisterViewModel)viewResult.Model;
             output.WriteLine("#################################");
             output.WriteLine("Printing the ViewResult");
             output.WriteLine("#################################");
             objectOperations.printObject(viewModel);
+            //Assert that register view is returned and that they containted genered student and teacher options.
             Assert.NotNull(viewResult);
             Assert.Equal(viewResult.ViewName, "Register");
-            // Cannot acces the Model from the viewresult, as it is defined just like an anonymous object without any properies, hence it cannot be tested in the controller
-            //Assert.NotNull(viewResult.Model.UserTypeList.Where(l => l.Text == "Student"));
+            Assert.NotNull(viewModel.UserTypeList.Where(l => l.Text == "Student"));
+            Assert.NotNull(viewModel.UserTypeList.Where(l => l.Text == "Teacher"));
          }
 
          [Fact]

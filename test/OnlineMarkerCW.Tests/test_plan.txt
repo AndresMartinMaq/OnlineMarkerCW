@@ -35,3 +35,27 @@ AccountController_UnitTests:
 ---------- bugs found ---
 *login viewmodel email was not validated on the server correctly.
 *logout post hanlder did redirect to the wrong place
+
+
+----home controller---
+
+1. Index GET
+		-redirect to teacher or student work.
+2. MyWorks GET
+		-returns view with the right data.
+3. MyWorks POST
+		--
+		--
+4. WorkDelete POST
+
+5. WorkView GET
+
+
+6. MyMarkings GET
+7. WorkViewForMarker GET
+8. WorkViewForMarket POST
+
+---- perhaps dont test
+9. About GET
+10. Error GET
+11. Error_Message GET

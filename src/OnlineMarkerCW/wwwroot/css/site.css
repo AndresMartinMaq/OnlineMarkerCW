@@ -62,6 +62,11 @@ code {
   color: red;
 }
 
+h3.generic-error div.validation-summary-errors > ul{
+  list-style-type: none;
+  padding-left: 0px;
+}
+
 .generic-message{
  color: green;
 }
