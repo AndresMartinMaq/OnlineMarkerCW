@@ -1,21 +1,27 @@
 using System;
-using System.Collections.Generic;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Internal;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using OnlineMarkerCW.Models;
 
 namespace OnlineMarkerCW.ViewModels
 {
-  public class MyWorksViewModel {
+    public class MyWorksViewModel {
 
-    [Required]
-    [DataType(DataType.Upload)]
-    public IFormFile File { get; set; }
+        [Required]
+        [DataType(DataType.Upload)]
+        public IFormFile File { get; set; }
 
-  }
+    }
+
+    public class MarkingViewModel
+    {
+
+        [Required]
+        [StringLength(200, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 20)]
+        public String feedback { get; set; }
+
+        [Required]
+        [Range(0, 100, ErrorMessage = "The mark must be between 0 and 100 (inclusive).")]
+        public int mark { get; set; }
+
+    }
 }

@@ -200,24 +200,18 @@ namespace OnlineMarkerCW.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         //Update the Work in db to include new mark and feedback.
-        public async Task<IActionResult> WorkViewForMarker(int id, String feedback, int mark)
+        public async Task<IActionResult> WorkViewForMarker(int id, MarkingViewModel viewModel)
         {
-            //Validate input.
-            //string feedbackEncoded = HtmlEncoder.Default.Encode(feedback); isn't necessary, the framework seems to take care of injections here.
-            if (mark > 100 || mark < 0)
-            {
-                //This would have been prevented by client validation, meaning that if we reach this state, the user messed with the request or html.
-                //Therefore, we didn't implement a "nice" explicit error reporting and we will just return the original page.
-                ModelState.AddModelError("Mark Error", "Mark should be a number from 0 to 100.");
-            }
 
             //Write to db.
             var work = await _dbServices.GetWorkWithID(id);
             var user = await _userManager.GetUserAsync(this.User);
             if (ModelState.IsValid)
             {
-                _dbServices.MarkWork(work, user, feedback, mark);
+                _dbServices.MarkWork(work, user, viewModel.feedback, viewModel.mark);
                 ViewData["update-confirmation-msg"] = "Feedback and Mark Updated Successfully";
+            } else {
+                //TODO ViewData["input-feedback-preservation"] = viewModel.feedback;
             }
             return View(work);
         }
