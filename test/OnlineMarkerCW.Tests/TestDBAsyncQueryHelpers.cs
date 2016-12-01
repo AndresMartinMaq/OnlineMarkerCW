@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore.Query.Internal;
 //source #2 http://stackoverflow.com/questions/40476233/how-to-mock-an-async-repository-with-entity-framework-core
  namespace OnlineMarkerCW.UnitTests.Services
 {
+  //These classed provide mapping of assycrounes DB queries to the Entity core Frameowrk interfaces
   internal class TestAsyncQueryProvider<TEntity> : IAsyncQueryProvider
   {
       private readonly IQueryProvider _inner;

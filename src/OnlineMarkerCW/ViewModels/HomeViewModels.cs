@@ -11,6 +11,7 @@ using OnlineMarkerCW.Models;
 
 namespace OnlineMarkerCW.ViewModels
 {
+  //Define a Viewmodel for the File Upload post request and the relevand Validaiton requirements
   public class MyWorksViewModel {
 
     [Required]

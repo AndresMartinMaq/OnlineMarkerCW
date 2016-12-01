@@ -23,6 +23,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace OnlineMarkerCW.Interfaces
 {
+  //Define an inteface for the DBServices, so that it can be injected as a dependecy.
     public interface IDbServices
     {
         Task<List<Work>> GetSubmitedWorks(ApplicationUser Owner);

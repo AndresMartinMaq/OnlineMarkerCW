@@ -9,8 +9,7 @@ using OnlineMarkerCW.Models;
 
 namespace OnlineMarkerCW.ViewModels
 {
-
-
+//Define a Viewmodel for the REigstraion post request and the relevand Validaiton requirements
     public class RegisterViewModel
     {
 
@@ -58,7 +57,7 @@ namespace OnlineMarkerCW.ViewModels
       public List<SelectListItem> UserTypeList { get; set; }
 
     }
-
+//Define a Viewmodel for the Login post request and the relevand Validaiton requirements
     public class LoginViewModel
     {
         [Required]

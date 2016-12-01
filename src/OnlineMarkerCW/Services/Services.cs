@@ -25,6 +25,7 @@ using OnlineMarkerCW.Interfaces;
 namespace OnlineMarkerCW.Services
 {
 
+//Dfine DB services class, which  containts methods for interacting with the DB.
 	public class DbServices : IDbServices {
 
         private ApplicationDbContext _context;// db context for writing to the Works DB
@@ -39,26 +40,31 @@ namespace OnlineMarkerCW.Services
 		    return await _context.Works.Where(w => w.Owner == Owner).OrderBy(w => w.SubmitDate).ToListAsync();
 	    }
 
+			//Get work based on its ID
         public async Task<Work> GetWorkWithID(int id){
             return await _context.Works.FirstOrDefaultAsync(w => w.WorkID == id);
         }
 
-        //Include Owner tells the framework to load the foreign key field Owner, otherwise it will be null.
+				//Get a full list of works their owners
         public async Task<List<Work>> GetWorksAndOwners()
         {
+					//Include Owner tells the framework to load the foreign key field Owner, otherwise it will be null.
             return await _context.Works.OrderBy(w => w.SubmitDate).Include(w => w.Owner).ToListAsync();
         }
 
+				//Add a new work to the DB
         public void AddWork(Work work){
             _context.Works.Add(work);
             _context.SaveChanges();
         }
 
+				//Remove work from the DB
         public void RemoveWork(Work work){
             _context.Works.Remove(work);
             _context.SaveChanges();
         }
 
+				//Update the work by adding a new mark to it.
         public void MarkWork(Work work, ApplicationUser marker, String feedback, int mark) {
             work.Marked = true;
             work.MarkDate = DateTime.Now;

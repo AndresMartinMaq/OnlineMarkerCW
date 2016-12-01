@@ -45,7 +45,6 @@ namespace OnlineMarkerCW.UnitTests.Controllers
               _logger                           = new LoggerFactory();
               var m_actionContext               = new ActionContext();
               var m_IUserStore                  = new Mock<IUserStore<ApplicationUser>>();
-              //var userStore                     = new UserStore<ApplicationUser>();
               this.m_userManager                = new Mock<UserManager<ApplicationUser>>(m_IUserStore.Object, null, null, null, null, null, null, null, null);
               this.userManager                  = new UserManager<ApplicationUser>(m_IUserStore.Object, null, null, null, null, null, null, null, null);
               var m_IHttpContextAccessor        = new Mock<IHttpContextAccessor>();
@@ -292,7 +291,7 @@ namespace OnlineMarkerCW.UnitTests.Controllers
           //Verify that methods are called
           m_userManager.Verify(u => u.AddClaimAsync(It.IsAny<ApplicationUser>(), It.IsAny<Claim>()),Times.AtLeastOnce());
           m_userManager.Verify(u => u.AddToRoleAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>()), Times.Once());
-          //cannot mock function which does continat opitonal argumetns 
+          //cannot mock function which does continat opitonal argumetns
           //m_signInManager.Verify(s => s.SignInAsync(It.IsAny<ApplicationUser>(), false), Times.Once());
 
          }

@@ -8,11 +8,12 @@ using OnlineMarkerCW.Models;
 
 namespace OnlineMarkerCW.Data
 {
+  //Define DB context for the applcicaiton, derive it from the Identity context so that one context is used for the Indeity framework and the application itself.
     public class ApplicationDbContext : IdentityDbContext<ApplicationUser,ApplicationUserRole, string>
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) {}
 
-        //public DbSet<User> Users { get; set; }
+        //include works into the context
         public virtual DbSet<Work> Works { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
