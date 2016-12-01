@@ -216,7 +216,9 @@ namespace OnlineMarkerCW.UnitTests.Controllers
             controller.ControllerContext = contexts.controllerContext;
 
             //Act
-            ViewResult result = (ViewResult)await controller.WorkViewForMarker(testWork.WorkID, newFeedback, newMark);
+            MarkingViewModel vm = new MarkingViewModel();
+            vm.feedback = newFeedback; vm.mark = newMark;
+            ViewResult result = (ViewResult)await controller.WorkViewForMarker(testWork.WorkID, vm);
 
             //Assert
             Work retrievedWork = (Work)result.Model;
