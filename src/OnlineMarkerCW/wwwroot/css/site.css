@@ -236,6 +236,7 @@ div.submissions_list > p:nth-of-type(1){
 
 div.submissions_list > p{
   font-weight: bold;
+  font-size: 18px;
   width: calc(33% - 8px);
   display: inline-block;
   text-align: center;
@@ -248,13 +249,14 @@ div.submissions_list > ol > li > * {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  padding-top:10px;
 }
 
 div.submissions_list > ol > li:nth-of-type(1) {
   margin-top: 3px;
 }
 
-div.submissions_list > ol > li > p:nth-of-type(1) {
+div.submissions_list > ol > li > .middle-col {
   border-right: solid 2px black;
   border-left: solid 2px black;
 }

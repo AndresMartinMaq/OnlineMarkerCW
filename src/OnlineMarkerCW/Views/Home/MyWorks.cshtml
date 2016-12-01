@@ -29,7 +29,8 @@
 <ol>
   @foreach (var work in Model) {
     <li>
-    <a asp-controller="Home" asp-route-id="@work.WorkID" title="@work.FileName" asp-action="WorkView"> @work.FileName</a> <p>@work.SubmitDate</p>
+    <a asp-controller="Home" asp-route-id="@work.WorkID" title="@work.FileName" asp-action="WorkView"> @work.FileName</a> 
+    <p class="middle-col">@work.SubmitDate</p>
     @if (@work.Marked)
       {
          <p class="@( @work.Mark < 40 ? "generic-error" : "generic-message")" > @work.Mark </p>
