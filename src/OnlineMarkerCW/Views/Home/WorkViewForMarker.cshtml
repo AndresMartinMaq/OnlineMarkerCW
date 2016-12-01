@@ -15,12 +15,6 @@
 <h3 class="generic-message">@ViewData["update-confirmation-msg"]</h3>
 <h3 class="generic-error">@Html.ValidationSummary()</h3>
 
-@if (ViewData["user_role"] == "Student")
-{
-    <form method="post" asp-action="WorkDelete" asp-controller="Home" asp-route-id="@Model.WorkID">
-        <input type="submit" class="red" value="Delete this upload" />
-    </form>
-}
 <h3 class="render_switch_btn">
     <a id="src_code_button">html source code </a> |
     <a id="html_render_button"> html render result </a> |
@@ -84,7 +78,13 @@
     <div class="col-md-8">
         @Html.AntiForgeryToken()
         <h3>Feedback</h3>
-        <textarea class="larger" form="gradingForm" name="feedback" rows="8">@Model.Feedback</textarea>
+        <textarea class="larger" form="gradingForm" name="feedback" rows="4" maxlength="200"">
+        @if (ViewData.ContainsKey("input-feedback-preservation")) {
+            @ViewData["input-feedback-preservation"]
+        } else {
+            @Model.Feedback
+        }
+        </textarea>
         <br>
         <input type="submit" value="Sumbit Marking">
         @Html.ValidationSummary()
