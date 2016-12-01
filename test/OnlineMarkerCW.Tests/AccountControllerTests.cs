@@ -189,7 +189,7 @@ namespace OnlineMarkerCW.UnitTests.Controllers
          public async Task POST_Register_ReturnsLoginView_WhenModelStateinValid() {
            //Arrange
            var error_mess = "Name is field is Required.";
-           var m_registerViewModel = new RegisterViewModel() {     Email = "test@test.com",   Name  = "TestPersonName",   Surname = "TestPersonSurname",   Password = "testPassword1234",     ConfirmPassword  = "testPassword1234",    UserTypeID = 0};
+           var m_registerViewModel = new RegisterViewModel() {  Email = "test@test.com",   Name  = "TestPersonName",   Surname = "TestPersonSurname",   Password = "testPassword1234",     ConfirmPassword  = "testPassword1234",    UserTypeID = 0};
 
            _accountController.ModelState.AddModelError(string.Empty, error_mess);
            //Act

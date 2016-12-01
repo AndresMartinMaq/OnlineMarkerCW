@@ -66,35 +66,15 @@ namespace OnlineMarkerCW.UnitTests.Controllers
         [InlineData("Teacher")]
         public void GET_Index_RedirectsAccordingToRole(String role)
         {
+
             // --Arrange--
-
-            //-User
-            var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
-            {
-                 new Claim(ClaimTypes.NameIdentifier, "1"),
-                 new Claim("Name", "Stuart"),
-                 new Claim(ClaimTypes.Surname, "Dent"),
-                 new Claim(ClaimTypes.Email, "some@email.com"),
-                 new Claim(ClaimTypes.Role, role)
-            }));
-
-            //Create a HttpContext
-            var testHttpCtxt = new DefaultHttpContext() { User = user };
-            //Create ActionExecutingContext.
-            var actionContext = new ActionContext(testHttpCtxt, new RouteData(), new ActionDescriptor(), new ModelStateDictionary());
-            var ListFilterMetaData = new List<IFilterMetadata>() { new Mock<IFilterMetadata>().Object };
-            var actionExecutingContext = new ActionExecutingContext(actionContext, ListFilterMetaData, new Dictionary<string, object>(), null);
-
+            var userClaims = getClaims("1", "Stuart", "Dent", "some@email.com", role);
+            var contexts = getsContexts(userClaims);
             //Set home controller to use mock context
-            var controllerContext = new ControllerContext(new ActionContext(
-                testHttpCtxt,
-                new RouteData(),
-                new Microsoft.AspNetCore.Mvc.Controllers.ControllerActionDescriptor(),
-                new ModelStateDictionary()));
-            controller.ControllerContext = controllerContext;
+            controller.ControllerContext = contexts.controllerContext;
 
             //Force use of ActionExectuing Context.
-            controller.OnActionExecuting(actionExecutingContext);
+            controller.OnActionExecuting(contexts.actionExecutingContext);
 
             // Act
             var result = controller.Index();
@@ -115,15 +95,8 @@ namespace OnlineMarkerCW.UnitTests.Controllers
             // --Arrange--
 
             //User
+            var userClaims = getClaims("1", "Alice", "Dent", "some@email.com", "Student");
             ApplicationUser user = new ApplicationUser();
-            var userClaims = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
-            {
-                 new Claim(ClaimTypes.NameIdentifier, "1"),
-                 new Claim("Name", "Alice"),
-                 new Claim(ClaimTypes.Surname, "Dent"),
-                 new Claim(ClaimTypes.Email, "some@email.com"),
-                 new Claim(ClaimTypes.Role, "Student")
-            }));
             //Works, example list with 3 works.
             List<Work> works = new List<Work>(3);
             for (int i = 1; i < 4; i++) {
@@ -132,7 +105,6 @@ namespace OnlineMarkerCW.UnitTests.Controllers
                 w.Owner = user;
                 works.Add(w);
             }
-
             //Controller and database dependencies.
             //--userManager
             m_userManager.Setup(um => um.GetUserAsync(userClaims)).ReturnsAsync<UserManager<ApplicationUser>, ApplicationUser>(user);
@@ -141,12 +113,8 @@ namespace OnlineMarkerCW.UnitTests.Controllers
 
 
             //Set home controller to use context with mock user
-            var controllerContext = new ControllerContext(new ActionContext(
-                new DefaultHttpContext() { User = userClaims },
-                new RouteData(),
-                new Microsoft.AspNetCore.Mvc.Controllers.ControllerActionDescriptor(),
-                new ModelStateDictionary()));
-            controller.ControllerContext = controllerContext;
+            var contexts = getsContexts(userClaims);
+            controller.ControllerContext = contexts.controllerContext;
 
             // Act
             ViewResult result = (ViewResult) await controller.MyWorks();
@@ -167,26 +135,12 @@ namespace OnlineMarkerCW.UnitTests.Controllers
             testWork.Feedback = Feedback;
             testWork.Mark = 10;
 
-            //Setup Userfor botch cases
-              var userClaims = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
-              {
-                   new Claim(ClaimTypes.NameIdentifier, "5"),
-                   new Claim("Name", "Tea"),
-                   new Claim(ClaimTypes.Surname, "Cheery"),
-                   new Claim(ClaimTypes.Email, "some@email.com"),
-                   new Claim(ClaimTypes.Role, "Teacher")
-              }));
+            //Setup User for botch cases
+              var userClaims = getClaims("5", "Tea", "Cheery", "some@email.com", "Teacher");
               ApplicationUser user = new ApplicationUser();
               testWork.Owner = user;
              if  (attempt == 2){
-                userClaims = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
-                {
-                     new Claim(ClaimTypes.NameIdentifier, "8"),
-                     new Claim("Name", "testStundet"),
-                     new Claim(ClaimTypes.Surname, "testStundet"),
-                     new Claim(ClaimTypes.Email, "someStudent@email.com"),
-                     new Claim(ClaimTypes.Role, "Student")
-                }));
+                userClaims = getClaims("5", "testStundet", "testStundet", "someStudent@email.com", "Student");
                 ApplicationUser user2 = new ApplicationUser();
                 testWork.Owner = user2;
             }
@@ -198,18 +152,13 @@ namespace OnlineMarkerCW.UnitTests.Controllers
             m_dbServices.Setup(dbs => dbs.GetWorkWithID(testWork.WorkID)).ReturnsAsync(testWork);
 
             //Set home controller to use context with mock user
-            var controllerContext = new ControllerContext(new ActionContext(
-                new DefaultHttpContext() { User = userClaims },
-                new RouteData(),
-                new Microsoft.AspNetCore.Mvc.Controllers.ControllerActionDescriptor(),
-                new ModelStateDictionary()));
-            controller.ControllerContext = controllerContext;
+            var contexts = getsContexts(userClaims);
+            controller.ControllerContext = contexts.controllerContext;
 
             //Act
             var result = await controller.WorkView(testWork.WorkID);
 
             //Assert
-
             output.WriteLine("#################################");
             output.WriteLine("Printing the result");
             output.WriteLine("#################################");
@@ -235,22 +184,15 @@ namespace OnlineMarkerCW.UnitTests.Controllers
         public async Task POST_WorkView_ForMarkerUpdatesWorkWithFeedbackAndMark(int newMark)
         {
             //Arrange
-            String newFeedback = "This is useful example feedback";
-            String oldFeedback = "Unconstructive feedback";
+            string newFeedback = "This is useful example feedback";
+            string oldFeedback = "Unconstructive feedback";
             Work testWork = new Work();
             testWork.WorkID = 1;
             testWork.Feedback = oldFeedback;
             testWork.Mark = 10;
 
             //User (Teacher-Marker)
-            var userClaims = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
-            {
-                 new Claim(ClaimTypes.NameIdentifier, "5"),
-                 new Claim("Name", "Tea"),
-                 new Claim(ClaimTypes.Surname, "Cheery"),
-                 new Claim(ClaimTypes.Email, "some@email.com"),
-                 new Claim(ClaimTypes.Role, "Teacher")
-            }));
+            var userClaims = getClaims("5", "Tea", "Cheery", "some@email.com", "Teacher");
             ApplicationUser user = new ApplicationUser();
 
             //Controller and database dependencies.
@@ -270,12 +212,8 @@ namespace OnlineMarkerCW.UnitTests.Controllers
 
 
             //Set home controller to use context with mock user
-            var controllerContext = new ControllerContext(new ActionContext(
-                new DefaultHttpContext() { User = userClaims },
-                new RouteData(),
-                new Microsoft.AspNetCore.Mvc.Controllers.ControllerActionDescriptor(),
-                new ModelStateDictionary()));
-            controller.ControllerContext = controllerContext;
+            var contexts = getsContexts(userClaims);
+            controller.ControllerContext = contexts.controllerContext;
 
             //Act
             ViewResult result = (ViewResult)await controller.WorkViewForMarker(testWork.WorkID, newFeedback, newMark);
@@ -302,14 +240,8 @@ namespace OnlineMarkerCW.UnitTests.Controllers
             //Arrange
 
               //create new student user context
-              var userClaims = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
-              {
-                   new Claim(ClaimTypes.NameIdentifier, "1"),
-                   new Claim("Name", "NameTest"),
-                   new Claim(ClaimTypes.Surname, "NameTestSurname"),
-                   new Claim(ClaimTypes.Email, "test@email.com"),
-                   new Claim(ClaimTypes.Role, "Student")
-              }));
+              var userClaims = getClaims("1", "NameTest", "NameTestSurname", "test@email.com", "Student");
+
               var user1 = new ApplicationUser() {UserName = "test@email.com"};
               var user2 = new ApplicationUser() {UserName = "test2@email.com"};
               //Create new DB entry
@@ -324,12 +256,8 @@ namespace OnlineMarkerCW.UnitTests.Controllers
               //m_dbServices.Setup(dbs => dbs.GetSubmitedWorks(It.Is<ApplicationUser>(i => i.UserName == user1.UserName))).Returns(Task.FromResult(workList));
 
               //Set home controller to use context with mock user
-              var controllerContext = new ControllerContext(new ActionContext(
-                  new DefaultHttpContext() { User = userClaims },
-                  new RouteData(),
-                  new Microsoft.AspNetCore.Mvc.Controllers.ControllerActionDescriptor(),
-                  new ModelStateDictionary()));
-              controller.ControllerContext = controllerContext;
+              var contexts = getsContexts(userClaims);
+              controller.ControllerContext = contexts.controllerContext;
 
               //Act
               var result = await controller.MyWorks();
@@ -351,35 +279,21 @@ namespace OnlineMarkerCW.UnitTests.Controllers
         [InlineData(3)]
           public async Task POST_MyWorks_ReturnsMyworkViewWithRightModel_ValidationNotPassed(int testAttempt) {
 
+            //Pre-arrange based on the attempt
             var nameIdentifier = "5";
             var error_mess = "File field is required.";
             var m_myWorksViewModel = new MyWorksViewModel() {File = null};
             var getValidationString = "";
-            //Pre-arrange based on the attempt
             if (testAttempt == 2) {
-              //create a stream of emtpy file, but with a right extension
-              var s = "";
-              var ms = new MemoryStream();
-              var writer = new StreamWriter(ms);
-              writer.Write(s);
-              writer.Flush();
-              ms.Position = 0;
-              var file = new FormFile(ms, 0, 0, "test.html", "test.html");
-              m_myWorksViewModel = new MyWorksViewModel() {File = file};
+              //create a Viewmodel with a stream of emtpy file, but with a right extension
+              m_myWorksViewModel = getMyWorksViewModel ("", 0, "test.html");
 
               nameIdentifier = "6";
               error_mess = "Upload failed, please try again, don't forget to check the file size and extension.";
               getValidationString = "File";
             } else if (testAttempt == 3) {
-              //create a stream of a non emtpy file, but with a wrong extension
-              var s = "<html><body></body></html>";
-              var ms = new MemoryStream();
-              var writer = new StreamWriter(ms);
-              writer.Write(s);
-              writer.Flush();
-              ms.Position = 0;
-              var file = new FormFile(ms, 0, 60, "test.json", "test.json");
-              m_myWorksViewModel = new MyWorksViewModel() {File = file};
+              //create a Viewmodel with a stream of a non emtpy file, but with a wrong extension
+              m_myWorksViewModel = getMyWorksViewModel ("<html><body></body></html>", 60, "test.json");
 
               nameIdentifier = "7";
               error_mess = "Upload failed, please try again, don't forget to check the file size and extension.";
@@ -391,33 +305,18 @@ namespace OnlineMarkerCW.UnitTests.Controllers
             var hosting_path = "./test_wwwroot";
             m_hostingEnv.Setup(h => h.WebRootPath).Returns(hosting_path);
             //create new student user context
-            var userClaims = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
-            {
-                 new Claim(ClaimTypes.NameIdentifier, nameIdentifier),
-                 new Claim("Name", "NameTest"),
-                 new Claim(ClaimTypes.Surname, "NameTestSurname"),
-                 new Claim(ClaimTypes.Email, "test@email.com"),
-                 new Claim(ClaimTypes.Role, "Student")
-            }));
+            var userClaims = getClaims(nameIdentifier, "NameTest", "NameTestSurname", "test@email.com", "Student");
             var user1 = new ApplicationUser() {UserName = "test@email.com"};
             //Create Work
             Work testWork = new Work() {WorkID = 1, SubmitDate =  DateTime.Now,Owner = user1};
             var workList = new List<Work> () {testWork};
-            //Set home controller to use context with mock user
-            //Create a HttpContext
-            var testHttpCtxt = new DefaultHttpContext() { User = userClaims };
-            //Create ActionExecutingContext.
-            var actionContext = new ActionContext(testHttpCtxt, new RouteData(), new ActionDescriptor(), new ModelStateDictionary());
-            var ListFilterMetaData = new List<IFilterMetadata>() { new Mock<IFilterMetadata>().Object };
-            var actionExecutingContext = new ActionExecutingContext(actionContext, ListFilterMetaData, new Dictionary<string, object>(), null);
 
             //Set home controller to use mock context
-            var controllerContext = new ControllerContext(new ActionContext(
-                testHttpCtxt,
-                new RouteData(),
-                new Microsoft.AspNetCore.Mvc.Controllers.ControllerActionDescriptor(),
-                new ModelStateDictionary()));
-            controller.ControllerContext = controllerContext;
+            var contexts = getsContexts(userClaims);
+            controller.ControllerContext = contexts.controllerContext;
+
+            //Force use of ActionExectuing Context.
+            controller.OnActionExecuting(contexts.actionExecutingContext);
 
             //Controller and database dependencies.
             //--userManager
@@ -426,11 +325,7 @@ namespace OnlineMarkerCW.UnitTests.Controllers
             m_dbServices.Setup(dbs => dbs.GetSubmitedWorks(It.Is<ApplicationUser>(i => i.UserName == user1.UserName))).ReturnsAsync(workList);
 
             //Add errors to the modelstate
-             if (testAttempt == 1)
-             controller.ModelState.AddModelError(string.Empty, error_mess);
-
-            //Force use of ActionExectuing Context.
-            controller.OnActionExecuting(actionExecutingContext);
+             if (testAttempt == 1) controller.ModelState.AddModelError(string.Empty, error_mess);
 
             //Act
              var result = await controller.MyWorks(m_myWorksViewModel);
@@ -455,47 +350,25 @@ namespace OnlineMarkerCW.UnitTests.Controllers
                         //Arrange
                         var succes_mess = "File upload sucessfull";
                         //Create workmodel with a file
-                        var s = "<html><body></body></html>";
-                        var ms = new MemoryStream();
-                        var writer = new StreamWriter(ms);
-                        writer.Write(s);
-                        writer.Flush();
-                        ms.Position = 0;
-                        var file = new FormFile(ms, 0, 60, "test_complete.html", "test_complete.html");
-                        var m_myWorksViewModel = new MyWorksViewModel() {File = file};
+                        var m_myWorksViewModel = getMyWorksViewModel ("<html><body></body></html>", 60, "test_complete.html");
                         //Setup hosting env and user id for the path retrieval
                         var hosting_path = "./test_wwwroot";
                         m_hostingEnv.Setup(h => h.WebRootPath).Returns(hosting_path);
 
                         //create new student user context
-                        var userClaims = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
-                        {
-                             new Claim(ClaimTypes.NameIdentifier, "8"),
-                             new Claim("Name", "NameTest"),
-                             new Claim(ClaimTypes.Surname, "NameTestSurname"),
-                             new Claim(ClaimTypes.Email, "test@email.com"),
-                             new Claim(ClaimTypes.Role, "Student")
-                        }));
+                        var userClaims = getClaims("8", "NameTest", "NameTestSurname", "test@email.com", "Student");
+
                         var user1 = new ApplicationUser() {UserName = "test@email.com"};
                         //Create Work
                         Work testWork = new Work() {WorkID = 1, SubmitDate =  DateTime.Now,Owner = user1};
                         Work returnWork = new Work() {};
                         var workList = new List<Work> () {testWork};
-                        //Set home controller to use context with mock user
-                        //Create a HttpContext
-                        var testHttpCtxt = new DefaultHttpContext() { User = userClaims };
-                        //Create ActionExecutingContext.
-                        var actionContext = new ActionContext(testHttpCtxt, new RouteData(), new ActionDescriptor(), new ModelStateDictionary());
-                        var ListFilterMetaData = new List<IFilterMetadata>() { new Mock<IFilterMetadata>().Object };
-                        var actionExecutingContext = new ActionExecutingContext(actionContext, ListFilterMetaData, new Dictionary<string, object>(), null);
-
                         //Set home controller to use mock context
-                        var controllerContext = new ControllerContext(new ActionContext(
-                            testHttpCtxt,
-                            new RouteData(),
-                            new Microsoft.AspNetCore.Mvc.Controllers.ControllerActionDescriptor(),
-                            new ModelStateDictionary()));
-                        controller.ControllerContext = controllerContext;
+                        var contexts = getsContexts(userClaims);
+                        controller.ControllerContext = contexts.controllerContext;
+
+                        //Force use of ActionExectuing Context.
+                        controller.OnActionExecuting(contexts.actionExecutingContext);
 
                         //Controller and database dependencies.
                         //--userManager
@@ -510,9 +383,6 @@ namespace OnlineMarkerCW.UnitTests.Controllers
                                   returnWork.SubmitDate = w.SubmitDate;
                                   returnWork.Owner = w.Owner;
                                             });
-
-                        //Force use of ActionExectuing Context.
-                        controller.OnActionExecuting(actionExecutingContext);
 
                         //Act
                          var result = await controller.MyWorks(m_myWorksViewModel);
@@ -558,33 +428,18 @@ namespace OnlineMarkerCW.UnitTests.Controllers
                           }
 
                           //create new student user context
-                          var userClaims = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
-                          {
-                               new Claim(ClaimTypes.NameIdentifier, "8"),
-                               new Claim("Name", "NameTest"),
-                               new Claim(ClaimTypes.Surname, "NameTestSurname"),
-                               new Claim(ClaimTypes.Email, "test@email.com"),
-                               new Claim(ClaimTypes.Role, "Student")
-                          }));
+                          var userClaims = getClaims("8", "NameTest", "NameTestSurname", "test@email.com", "Student");
+
                           var user1 = new ApplicationUser() {UserName = "test@email.com"};
                           var user2 = new ApplicationUser() {UserName = "test2@email.com"};
                           //Create Work
                           Work testWork = new Work() {WorkID = 1, FilePath = filepath, SubmitDate =  DateTime.Now, Owner = user2};
-                          //Set home controller to use context with mock user
-                          //Create a HttpContext
-                          var testHttpCtxt = new DefaultHttpContext() { User = userClaims };
-                          //Create ActionExecutingContext.
-                          var actionContext = new ActionContext(testHttpCtxt, new RouteData(), new ActionDescriptor(), new ModelStateDictionary());
-                          var ListFilterMetaData = new List<IFilterMetadata>() { new Mock<IFilterMetadata>().Object };
-                          var actionExecutingContext = new ActionExecutingContext(actionContext, ListFilterMetaData, new Dictionary<string, object>(), null);
-
                           //Set home controller to use mock context
-                          var controllerContext = new ControllerContext(new ActionContext(
-                              testHttpCtxt,
-                              new RouteData(),
-                              new Microsoft.AspNetCore.Mvc.Controllers.ControllerActionDescriptor(),
-                              new ModelStateDictionary()));
-                          controller.ControllerContext = controllerContext;
+                          var contexts = getsContexts(userClaims);
+                          controller.ControllerContext = contexts.controllerContext;
+
+                          //Force use of ActionExectuing Context.
+                          controller.OnActionExecuting(contexts.actionExecutingContext);
 
                           //Controller and database dependencies.
                           //--userManager
@@ -595,8 +450,6 @@ namespace OnlineMarkerCW.UnitTests.Controllers
                           }
                           //--dbServices
                           m_dbServices.Setup(dbs => dbs.GetWorkWithID(testWork.WorkID)).ReturnsAsync(testWork);
-                          //Force use of ActionExectuing Context.
-                          controller.OnActionExecuting(actionExecutingContext);
 
                           //Act
                            var result = await controller.WorkDelete(testWork.WorkID);
@@ -616,5 +469,59 @@ namespace OnlineMarkerCW.UnitTests.Controllers
                           if (testAttempt == 2 ) Assert.True(!File.Exists(filepath));
             }
 
+
+            //**Helper methods **//
+            //-create a ClaimsPrincipal
+            private ClaimsPrincipal getClaims (string iD, string name, string surname, string email, string role)
+            {
+                return new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
+                {
+                     new Claim(ClaimTypes.NameIdentifier, iD),
+                     new Claim("Name", name),
+                     new Claim(ClaimTypes.Surname, surname),
+                     new Claim(ClaimTypes.Email, email),
+                     new Claim(ClaimTypes.Role, role)
+                }));
+           }
+
+           //- create ActionExecutingContext and ControllerContext based on userClaims and return a helper class based on it.
+           private TestContexts getsContexts (ClaimsPrincipal UserClaims)
+           {
+              //Create a HttpContext
+              var testHttpCtxt = new DefaultHttpContext() { User = UserClaims };
+              //Create ActionExecutingContext.
+              var actionContext = new ActionContext(testHttpCtxt, new RouteData(), new ActionDescriptor(), new ModelStateDictionary());
+              var ListFilterMetaData = new List<IFilterMetadata>() { new Mock<IFilterMetadata>().Object };
+              var _actionExecutingContext = new ActionExecutingContext(actionContext, ListFilterMetaData, new Dictionary<string, object>(), null);
+
+              //Set home controller to use mock context
+              var _controllerContext = new ControllerContext(new ActionContext(
+                  testHttpCtxt,
+                  new RouteData(),
+                  new Microsoft.AspNetCore.Mvc.Controllers.ControllerActionDescriptor(),
+                  new ModelStateDictionary()));
+
+              return new TestContexts () {actionExecutingContext = _actionExecutingContext, controllerContext = _controllerContext};
+            }
+
+            //- a MyWorkVIewModel with a file based on a stream
+            private MyWorksViewModel getMyWorksViewModel (string s, int length, string fileName) {
+              var ms = new MemoryStream();
+              var writer = new StreamWriter(ms);
+              writer.Write(s);
+              writer.Flush();
+              ms.Position = 0;
+              var file = new FormFile(ms, 0, length, fileName, fileName);
+              return new MyWorksViewModel() {File = file};
+            }
+
+
+    }
+
+
+    // helper class to contain context information
+    public class TestContexts  {
+        public ActionExecutingContext actionExecutingContext;
+        public ControllerContext controllerContext;
     }
 }
