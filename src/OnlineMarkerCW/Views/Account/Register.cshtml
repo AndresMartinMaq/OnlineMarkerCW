@@ -10,13 +10,15 @@
           <div class="center-block"><label asp-for="Email" ></label></div>
           <div class="center-block"><input asp-for="Email" required/></div>
           <div class="center-block"><label asp-for="Name"></label></div>
-          <div class="center-block"><input asp-for="Name" minlength="2" maxlength="100" required/></div>
+          <div class="center-block"><input asp-for="Name" minlength="2" maxlength="100" pattern=".{2,100}" title="Should be between 2 and 100 characters" required/></div>
           <div class="center-block"><label asp-for="Surname"></label></div>
-          <div class="center-block"><input asp-for="Surname" minlength="2" maxlength="100" required/></div>
+          <div class="center-block"><input asp-for="Surname" minlength="2" maxlength="100" pattern=".{2,100}" title="Should be between 2 and 100 characters" required/></div>
           <div class="center-block"><label asp-for="Password"></label></div>
-          <div class="center-block"><input asp-for="Password" minlength="6" maxlength="100" required/></div>
+          <div class="center-block"><input asp-for="Password" minlength="6" maxlength="100" pattern=".{6,100}" title="Should be between 6 and 100 characters" required/></div>
           <div class="center-block"><label asp-for="ConfirmPassword"></label></div>
-          <div class="center-block"><input asp-for="ConfirmPassword" minlength="6" maxlength="100" required/></div>
+          <div class="center-block"><input asp-for="ConfirmPassword" minlength="6" maxlength="100" pattern=".{6,100}" title="Should be between 6 and 100 characters" required/></div>
+          @* <div class="center-block"><label name="test">test</label></div>
+          <div class="center-block"><input for="test"/></div> *@
           <div class="center-block"> @Html.LabelFor(m => m.UserTypeID)</div>
          <div class="center-block"> @Html.DropDownListFor(m => m.UserTypeID, new SelectList(Model.UserTypeList, "Value", "Text"))</div>
           <div class="center-block"><input type="submit"   value="Register" class="reg" /></div>

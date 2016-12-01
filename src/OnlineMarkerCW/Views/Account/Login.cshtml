@@ -13,7 +13,7 @@
   <div class="center-block"><label asp-for="Email"></label></div>
   <div class="center-block"><input asp-for="Email" required/></div>
   <div class="center-block"><label asp-for="Password"></label></div>
-  <div class="center-block"><input asp-for="Password" minlength="6" maxlength="100" required/></div>
+  <div class="center-block"><input asp-for="Password" minlength="6" maxlength="100" pattern=".{6,100}" title="Should be between 6 and 100 characters" required/></div>
   <div class="center-block"><input type="submit" value="Login" class="reg" /></div>
 </form>
   <div asp-validation-summary="All" class="generic-error"></div>

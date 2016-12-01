@@ -410,7 +410,7 @@ namespace OnlineMarkerCW.UnitTests.Controllers
           [InlineData(2)]
           public async Task POST_WorkDelete_ToMyWorks_AndDeletesFileForTheUserOwner(int testAttempt) {
                           //Arrange
-                          var filepath = "./test_wwwroot/test_delete.html";
+                          var filepath = Path.GetFullPath("./test_wwwroot/test_delete.html");
                           //Create a new file for testing the delete
                           if (testAttempt == 1) { //Only create fily on the first try as it should stay and asser that, then asser that it should be deleted on the second try
                             using (var fileStream = new FileStream(filepath, FileMode.CreateNew, FileAccess.ReadWrite))
