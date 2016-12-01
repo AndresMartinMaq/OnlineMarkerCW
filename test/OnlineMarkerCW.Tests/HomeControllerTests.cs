@@ -413,7 +413,7 @@ namespace OnlineMarkerCW.UnitTests.Controllers
                           var filepath = "./test_wwwroot/test_delete.html";
                           //Create a new file for testing the delete
                           if (testAttempt == 1) { //Only create fily on the first try as it should stay and asser that, then asser that it should be deleted on the second try
-                            using (var fileStream = new FileStream(filepath, FileMode.Create))
+                            using (var fileStream = new FileStream(filepath, FileMode.CreateNew, FileAccess.ReadWrite))
                             {   //create a file
                                 var s = "<html><body><p>I am going to be delete without even being noticed by anyone.</p></body></html>";
                                 var ms = new MemoryStream();
