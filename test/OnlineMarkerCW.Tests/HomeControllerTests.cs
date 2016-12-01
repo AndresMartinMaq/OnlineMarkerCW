@@ -216,18 +216,18 @@ namespace OnlineMarkerCW.UnitTests.Controllers
             controller.ControllerContext = contexts.controllerContext;
 
             //Act
-            MarkingViewModel vm = new MarkingViewModel();
-            vm.feedback = newFeedback; vm.mark = newMark;
-            ViewResult result = (ViewResult)await controller.WorkViewForMarker(testWork.WorkID, vm);
+            MarkingViewModel viewModel = new MarkingViewModel();
+            viewModel.feedback = newFeedback; viewModel.mark = newMark;
+            if (newMark < 0 || 100 < newMark) {
+                controller.ModelState.AddModelError("TestError", "Invalid mark");
+            }
+            ViewResult result = (ViewResult)await controller.WorkViewForMarker(testWork.WorkID, viewModel);
 
             //Assert
             Work retrievedWork = (Work)result.Model;
             if (newMark < 0 || 100 < newMark){
-                Assert.Equal(false, controller.ModelState.IsValid);
-                Assert.True(controller.ModelState.Values.ToList()[0].Errors.Where(e => e.ErrorMessage == "Mark should be a number from 0 to 100.").Count() == 1);
-                //Assert.Equal(ModelValidationState.Invalid, controller.ModelState.GetValidationState(""));
-                Assert.False(retrievedWork.Marked);
                 Assert.Equal(oldFeedback, retrievedWork.Feedback);
+                Assert.False(retrievedWork.Marked);
             } else {
                 //Work should have been marked correctly
                 Assert.True(retrievedWork.Marked);
@@ -347,129 +347,134 @@ namespace OnlineMarkerCW.UnitTests.Controllers
 
           }
 
-          [Fact]
-          public async Task POST_MyWorks_ReturnsMyworkViewWhenModelAndCreatedFile_WhenValidationPasses() {
-                        //Arrange
-                        var succes_mess = "File upload sucessfull";
-                        //Create workmodel with a file
-                        var m_myWorksViewModel = getMyWorksViewModel ("<html><body></body></html>", 60, "test_complete.html");
-                        //Setup hosting env and user id for the path retrieval
-                        var hosting_path = "./test_wwwroot";
-                        m_hostingEnv.Setup(h => h.WebRootPath).Returns(hosting_path);
+        [Fact]
+        public async Task POST_MyWorks_ReturnsMyworkViewWhenModelAndCreatedFile_WhenValidationPasses()
+        {
+            //Arrange
+            var succes_mess = "File upload sucessfull";
+            //Create workmodel with a file
+            var m_myWorksViewModel = getMyWorksViewModel("<html><body></body></html>", 60, "test_complete.html");
+            //Setup hosting env and user id for the path retrieval
+            var hosting_path = "./test_wwwroot";
+            m_hostingEnv.Setup(h => h.WebRootPath).Returns(hosting_path);
 
-                        //create new student user context
-                        var userClaims = getClaims("8", "NameTest", "NameTestSurname", "test@email.com", "Student");
+            //create new student user context
+            var userClaims = getClaims("8", "NameTest", "NameTestSurname", "test@email.com", "Student");
 
-                        var user1 = new ApplicationUser() {UserName = "test@email.com"};
-                        //Create Work
-                        Work testWork = new Work() {WorkID = 1, SubmitDate =  DateTime.Now,Owner = user1};
-                        Work returnWork = new Work() {};
-                        var workList = new List<Work> () {testWork};
-                        //Set home controller to use mock context
-                        var contexts = getsContexts(userClaims);
-                        controller.ControllerContext = contexts.controllerContext;
+            var user1 = new ApplicationUser() { UserName = "test@email.com" };
+            //Create Work
+            Work testWork = new Work() { WorkID = 1, SubmitDate = DateTime.Now, Owner = user1 };
+            Work returnWork = new Work() { };
+            var workList = new List<Work>() { testWork };
+            //Set home controller to use mock context
+            var contexts = getsContexts(userClaims);
+            controller.ControllerContext = contexts.controllerContext;
 
-                        //Force use of ActionExectuing Context.
-                        controller.OnActionExecuting(contexts.actionExecutingContext);
+            //Force use of ActionExectuing Context.
+            controller.OnActionExecuting(contexts.actionExecutingContext);
 
-                        //Controller and database dependencies.
-                        //--userManager
-                        m_userManager.Setup(um => um.GetUserAsync(userClaims)).ReturnsAsync<UserManager<ApplicationUser>, ApplicationUser>(user1);
-                        //--dbServices
-                        m_dbServices.Setup(dbs => dbs.GetSubmitedWorks(It.Is<ApplicationUser>(i => i.UserName == user1.UserName))).ReturnsAsync(workList);
-                        m_dbServices.Setup(dbs => dbs.AddWork(It.IsAny<Work>()))
-                            .Callback((Work w) =>
-                            {
-                                  returnWork.FileName = w.FileName;
-                                  returnWork.FilePath = w.FilePath;
-                                  returnWork.SubmitDate = w.SubmitDate;
-                                  returnWork.Owner = w.Owner;
-                                            });
+            //Controller and database dependencies.
+            //--userManager
+            m_userManager.Setup(um => um.GetUserAsync(userClaims)).ReturnsAsync<UserManager<ApplicationUser>, ApplicationUser>(user1);
+            //--dbServices
+            m_dbServices.Setup(dbs => dbs.GetSubmitedWorks(It.Is<ApplicationUser>(i => i.UserName == user1.UserName))).ReturnsAsync(workList);
+            m_dbServices.Setup(dbs => dbs.AddWork(It.IsAny<Work>()))
+                .Callback((Work w) =>
+                {
+                    returnWork.FileName = w.FileName;
+                    returnWork.FilePath = w.FilePath;
+                    returnWork.SubmitDate = w.SubmitDate;
+                    returnWork.Owner = w.Owner;
+                });
 
-                        //Act
-                         var result = await controller.MyWorks(m_myWorksViewModel);
-                          //add the newly generated work to the list
-                         workList.Add(returnWork);
-                         output.WriteLine("#################################");
-                         output.WriteLine("Printing the result");
-                         output.WriteLine("#################################");
-                         objectOperations.printObject(controller.ModelState);
-                         objectOperations.printObject(result);
-                        //Assert that MyWorks view is returned back. Assert that ModelState contains errors. Asssert That validation State is percieved as invalid.
-                        var viewResult = Assert.IsType<ViewResult>(result);
-                        var retrievedWork = (List<Work>)viewResult.Model;
-                        Assert.NotNull(viewResult);
-                        Assert.Equal(viewResult.ViewName, "MyWorks");
-                        Assert.Equal(viewResult.ViewData["upload-message"], succes_mess);
-                        Assert.Equal(workList, retrievedWork);
-                        //file is created
-                        Assert.True(File.Exists(returnWork.FilePath));
+            //Act
+            var result = await controller.MyWorks(m_myWorksViewModel);
+            //add the newly generated work to the list
+            workList.Add(returnWork);
+            output.WriteLine("#################################");
+            output.WriteLine("Printing the result");
+            output.WriteLine("#################################");
+            objectOperations.printObject(controller.ModelState);
+            objectOperations.printObject(result);
+            //Assert that MyWorks view is returned back. Assert that ModelState contains errors. Asssert That validation State is percieved as invalid.
+            var viewResult = Assert.IsType<ViewResult>(result);
+            var retrievedWork = (List<Work>)viewResult.Model;
+            Assert.NotNull(viewResult);
+            Assert.Equal(viewResult.ViewName, "MyWorks");
+            Assert.Equal(viewResult.ViewData["upload-message"], succes_mess);
+            Assert.Equal(workList, retrievedWork);
+            //file is created
+            Assert.True(File.Exists(returnWork.FilePath));
 
-          }
+        }
 
-          [Theory]
+        [Theory]
           [InlineData(1)]
           [InlineData(2)]
           public async Task POST_WorkDelete_ToMyWorks_AndDeletesFileForTheUserOwner(int testAttempt) {
-                          //Arrange
-                          var filepath = Path.GetFullPath("./test_wwwroot/test_delete.html");
-                          //Create a new file for testing the delete
-                          if (testAttempt == 1) { //Only create fily on the first try as it should stay and asser that, then asser that it should be deleted on the second try
-                            using (var fileStream = new FileStream(filepath, FileMode.CreateNew, FileAccess.ReadWrite))
-                            {   //create a file
-                                var s = "<html><body><p>I am going to be delete without even being noticed by anyone.</p></body></html>";
-                                var ms = new MemoryStream();
-                                var writer = new StreamWriter(ms);
-                                writer.Write(s);
-                                writer.Flush();
-                                ms.Position = 0;
-                                var file = new FormFile(ms, 0, 100, "test_complete.html", "test_complete.html");
-                                //save the file stream to the file
-                                await file.CopyToAsync(fileStream);
-                            }
-                          }
-
-                          //create new student user context
-                          var userClaims = getClaims("8", "NameTest", "NameTestSurname", "test@email.com", "Student");
-
-                          var user1 = new ApplicationUser() {UserName = "test@email.com"};
-                          var user2 = new ApplicationUser() {UserName = "test2@email.com"};
-                          //Create Work
-                          Work testWork = new Work() {WorkID = 1, FilePath = filepath, SubmitDate =  DateTime.Now, Owner = user2};
-                          //Set home controller to use mock context
-                          var contexts = getsContexts(userClaims);
-                          controller.ControllerContext = contexts.controllerContext;
-
-                          //Force use of ActionExectuing Context.
-                          controller.OnActionExecuting(contexts.actionExecutingContext);
-
-                          //Controller and database dependencies.
-                          //--userManager
-                          if (testAttempt == 1) {
-                            m_userManager.Setup(um => um.GetUserAsync(userClaims)).ReturnsAsync<UserManager<ApplicationUser>, ApplicationUser>(user1);
-                          } else if (testAttempt == 2) {
-                            m_userManager.Setup(um => um.GetUserAsync(userClaims)).ReturnsAsync<UserManager<ApplicationUser>, ApplicationUser>(user2);
-                          }
-                          //--dbServices
-                          m_dbServices.Setup(dbs => dbs.GetWorkWithID(testWork.WorkID)).ReturnsAsync(testWork);
-
-                          //Act
-                           var result = await controller.WorkDelete(testWork.WorkID);
-                            //add the newly generated work to the list
-                           output.WriteLine("#################################");
-                           output.WriteLine("Printing the result");
-                           output.WriteLine("#################################");
-                           objectOperations.printObject(controller.ModelState);
-                           objectOperations.printObject(result);
-                          //Assert
-                          var redirectToActionResult = Assert.IsType<RedirectToActionResult>(result);
-                          //Assert that controller redirects to MyWorks and And Performs delete
-                          Assert.Equal("Home", redirectToActionResult.ControllerName);
-                          Assert.Equal("MyWorks", redirectToActionResult.ActionName);
-                          //file is was deleted
-                          if (testAttempt == 1 ) Assert.True(File.Exists(filepath));
-                          if (testAttempt == 2 ) Assert.True(!File.Exists(filepath));
+            //Arrange
+            var filepath = Path.GetFullPath("./test_wwwroot/test_delete.html");
+            //Create a new file for testing the delete
+            if (testAttempt == 1)
+            { //Only create fily on the first try as it should stay and asser that, then asser that it should be deleted on the second try
+                using (var fileStream = new FileStream(filepath, FileMode.CreateNew, FileAccess.ReadWrite))
+                {   //create a file
+                    var s = "<html><body><p>I am going to be delete without even being noticed by anyone.</p></body></html>";
+                    var ms = new MemoryStream();
+                    var writer = new StreamWriter(ms);
+                    writer.Write(s);
+                    writer.Flush();
+                    ms.Position = 0;
+                    var file = new FormFile(ms, 0, 100, "test_complete.html", "test_complete.html");
+                    //save the file stream to the file
+                    await file.CopyToAsync(fileStream);
+                }
             }
+
+            //create new student user context
+            var userClaims = getClaims("8", "NameTest", "NameTestSurname", "test@email.com", "Student");
+
+            var user1 = new ApplicationUser() { UserName = "test@email.com" };
+            var user2 = new ApplicationUser() { UserName = "test2@email.com" };
+            //Create Work
+            Work testWork = new Work() { WorkID = 1, FilePath = filepath, SubmitDate = DateTime.Now, Owner = user2 };
+            //Set home controller to use mock context
+            var contexts = getsContexts(userClaims);
+            controller.ControllerContext = contexts.controllerContext;
+
+            //Force use of ActionExectuing Context.
+            controller.OnActionExecuting(contexts.actionExecutingContext);
+
+            //Controller and database dependencies.
+            //--userManager
+            if (testAttempt == 1)
+            {
+                m_userManager.Setup(um => um.GetUserAsync(userClaims)).ReturnsAsync<UserManager<ApplicationUser>, ApplicationUser>(user1);
+            }
+            else if (testAttempt == 2)
+            {
+                m_userManager.Setup(um => um.GetUserAsync(userClaims)).ReturnsAsync<UserManager<ApplicationUser>, ApplicationUser>(user2);
+            }
+            //--dbServices
+            m_dbServices.Setup(dbs => dbs.GetWorkWithID(testWork.WorkID)).ReturnsAsync(testWork);
+
+            //Act
+            var result = await controller.WorkDelete(testWork.WorkID);
+            //add the newly generated work to the list
+            output.WriteLine("#################################");
+            output.WriteLine("Printing the result");
+            output.WriteLine("#################################");
+            objectOperations.printObject(controller.ModelState);
+            objectOperations.printObject(result);
+            //Assert
+            var redirectToActionResult = Assert.IsType<RedirectToActionResult>(result);
+            //Assert that controller redirects to MyWorks and And Performs delete
+            Assert.Equal("Home", redirectToActionResult.ControllerName);
+            Assert.Equal("MyWorks", redirectToActionResult.ActionName);
+            //file is was deleted
+            if (testAttempt == 1) Assert.True(File.Exists(filepath));
+            if (testAttempt == 2) Assert.True(!File.Exists(filepath));
+        }
 
 
             //**Helper methods **//
