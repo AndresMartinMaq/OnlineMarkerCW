@@ -168,7 +168,7 @@ namespace OnlineMarkerCW.UnitTests.Controllers
               var retrievedWork = (Work)viewResult.Model;
               //Assert that MYWorks viewResult is returned and that model containts the same info
               Assert.NotNull(viewResult);
-              Assert.Equal(viewResult.ViewName, "MyWork");
+              Assert.Equal(viewResult.ViewName, "WorkView");
               Assert.Equal(testWork, retrievedWork);
             } else if  (attempt == 2){
               //Assert that wrong user is redirected

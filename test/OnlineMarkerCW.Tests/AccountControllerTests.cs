@@ -288,6 +288,13 @@ namespace OnlineMarkerCW.UnitTests.Controllers
           var redirectToActionResult = Assert.IsType<RedirectToActionResult>(result);
           Assert.Equal("Home", redirectToActionResult.ControllerName);
           Assert.Equal("Index", redirectToActionResult.ActionName);
+
+          //Verify that methods are called
+          m_userManager.Verify(u => u.AddClaimAsync(It.IsAny<ApplicationUser>(), It.IsAny<Claim>()),Times.AtLeastOnce());
+          m_userManager.Verify(u => u.AddToRoleAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>()), Times.Once());
+          //cannot mock function which does continat opitonal argumetns 
+          //m_signInManager.Verify(s => s.SignInAsync(It.IsAny<ApplicationUser>(), false), Times.Once());
+
          }
 
          [Fact]
@@ -299,6 +306,9 @@ namespace OnlineMarkerCW.UnitTests.Controllers
             var redirectToActionResult = Assert.IsType<RedirectToActionResult>(result);
             Assert.Equal("Account", redirectToActionResult.ControllerName);
             Assert.Equal("Login", redirectToActionResult.ActionName);
+
+            //Verify that methods are called
+            m_signInManager.Verify(s => s.SignOutAsync(), Times.Once());
          }
 
     }

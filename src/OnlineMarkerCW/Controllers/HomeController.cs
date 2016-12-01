@@ -165,7 +165,7 @@ namespace OnlineMarkerCW.Controllers
         var user = await _userManager.GetUserAsync(this.User);
         //check if owner or teacher tries to access the page
         if (work?.Owner == user || user_role == "Teacher") {
-           return View("MyWork",work);
+           return View("WorkView",work);
         } else {
           return Redirect("/Error_Message/403");
         }

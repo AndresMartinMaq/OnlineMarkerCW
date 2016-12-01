@@ -38,7 +38,7 @@ namespace OnlineMarkerCW.Services
 	    public async Task<List<Work>> GetSubmitedWorks(ApplicationUser Owner){
 		    return await _context.Works.Where(w => w.Owner == Owner).OrderBy(w => w.SubmitDate).ToListAsync();
 	    }
-        
+
         public async Task<Work> GetWorkWithID(int id){
             return await _context.Works.FirstOrDefaultAsync(w => w.WorkID == id);
         }
@@ -60,12 +60,12 @@ namespace OnlineMarkerCW.Services
         }
 
         public void MarkWork(Work work, ApplicationUser marker, String feedback, int mark) {
-            _context.Update(work);
             work.Marked = true;
             work.MarkDate = DateTime.Now;
             work.Feedback = feedback;
             work.Mark = mark;
             work.Marker = marker;
+						_context.Works.Update(work);
             _context.SaveChanges();
         }
 

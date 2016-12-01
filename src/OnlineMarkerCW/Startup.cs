@@ -17,7 +17,6 @@ using OnlineMarkerCW.Data;
 using OnlineMarkerCW.Models;
 using OnlineMarkerCW.Services;
 using OnlineMarkerCW.Interfaces;
-using OnlineMarkerCW.Policies;
 
 namespace OnlineMarkerCW
 {
@@ -107,13 +106,6 @@ namespace OnlineMarkerCW
               });
             services.AddMvc();
 
-            services.AddAuthorization(options =>
-            {
-                options.AddPolicy("AnonymousOnly",
-                                  policy => policy.Requirements.Add(new AnonymousOnlyRequirement()));
-            });
-
-            services.AddSingleton<IAuthorizationHandler, AnonymousOnlyHandler>();
             }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
