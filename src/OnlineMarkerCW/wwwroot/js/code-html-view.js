@@ -9,20 +9,21 @@ hljs.initHighlightingOnLoad();
 
         main_fun: function () {
             //show and hide is used and binded to the approporiate tab links, as toggle would make the same link to toggle the views and not to keep the display state.
+            //when src code is cliccked, show the source code and hide the rest
             $("#src_code_button").bind("click", function () {
               $(".view-container-both").hide();
               $(".view-container-src").show();
               $(".view-container-render").hide();
               $( '.frame' ).attr( 'srcdoc', ' ');
               });
-
+            //when html render is cliccked, show the rendered result and hide the rest
             $("#html_render_button").bind("click", function () {
               $(".view-container-both").hide();
               $(".view-container-src").hide();
               $( '.frame' ).attr( 'srcdoc', function () { return $( this ).attr('data-srcdoc'); });
               $(".view-container-render").show();
             });
-
+            //when side by side is cliccked, show the side by side result and hide the rest
             $("#sidebyside_button").bind("click", function () {
                 $(".view-container-render").hide();
                 $(".view-container-src").hide();
@@ -36,7 +37,7 @@ hljs.initHighlightingOnLoad();
              else
                return false;
 
-           }); 
+           });
         },
 
           //init the the event binding to the links
@@ -45,7 +46,7 @@ hljs.initHighlightingOnLoad();
               $(".view-container-both").hide();
             }
         }
-        //launch the app
+        //launch the application which binds the buttons
             $(document).ready(function () {
                 myWorkscript.init();
             });

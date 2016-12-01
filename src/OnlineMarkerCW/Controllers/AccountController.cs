@@ -27,6 +27,7 @@ namespace OnlineMarkerCW.Controllers
         private readonly ILogger _logger;//logger for debuging.
         private readonly IDbServices _dbServices;//dbservice methods.
 
+        //Inject the dependencies into the controller via the constructor
         public AccountController( UserManager<ApplicationUser> userManager,  SignInManager<ApplicationUser> signInManager,RoleManager<ApplicationUserRole> roleManager, ILoggerFactory loggerFactory,IDbServices dbServices )
         {
           _userManager = userManager;
@@ -63,7 +64,6 @@ namespace OnlineMarkerCW.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register(RegisterViewModel model)
         {
-        //  model.UserTypeList = createUserTypeList(); //populate the list with values, otherwise ASP.NET MVC core thinks you are sill and stry to access an null object for some reason.
           if (ModelState.IsValid)//checks if the incomming values from the reuqest can be mapped on the model.
             {
                 ApplicationUser user = new ApplicationUser();
@@ -72,13 +72,12 @@ namespace OnlineMarkerCW.Controllers
                 user.Name = model.Name;
                 user.Surname = model.Surname;
 
-                var result = await _userManager.CreateAsync(user, model.Password); //await in asyn mode for # a user
+                var result = await _userManager.CreateAsync(user, model.Password); //await in async for user to be created
                 if (result.Succeeded) //if registration succeeded, singin the user and redirect home
                 {
                   string userType;
                   userType = model.UserTypeID == 0 ? "Student" : "Teacher"; //check what value is passed from the request, if UserTypeID is 0 it is student, esle it is Teacher
-                  _logger.LogWarning(3, "Current RegisterViewModel.UserTypeID is {UserTypeList} and userType string is {userType}", model.UserTypeID,userType);
-                  if(!_roleManager.RoleExistsAsync(userType).Result)
+                  if(!_roleManager.RoleExistsAsync(userType).Result) //if role does not exists, create a new one.
                       {
                           ApplicationUserRole role = new ApplicationUserRole();
                           role.Name = userType;
@@ -90,12 +89,7 @@ namespace OnlineMarkerCW.Controllers
                             return View("Register",model);
                           }
                       }
-                    //log things into session
-                    /*HttpContext.Session.SetString("email", model.Email);
-                    HttpContext.Session.SetString("name",  model.Name);
-                    HttpContext.Session.SetString("surname", model.Surname);
-                    HttpContext.Session.SetString("role", userType);*/
-                    //store claims
+                    //store claims about the suer, so that they can be accessed from the controllers ContextData without having to read the db (like a session)
                     await _userManager.AddClaimAsync(user, new Claim(ClaimTypes.Email, model.Email));
                     await _userManager.AddClaimAsync(user, new Claim("Name",  model.Name));
                     await _userManager.AddClaimAsync(user, new Claim(ClaimTypes.Surname, model.Surname));
@@ -104,14 +98,14 @@ namespace OnlineMarkerCW.Controllers
                     await _userManager.AddToRoleAsync(user,userType); //add the user to the role
 
                     await _signInManager.SignInAsync(user, isPersistent: false); //sing in the user
-                    _logger.LogInformation(3, "User created a new account with password.");
 
                     return RedirectToAction(nameof(HomeController.Index), "Home"); //redirect to home page
                 }
+                //If creating user is unsuscefull, add errors to the ModelState
                 AddErrors(result);
             }
 
-            // If there is a fail, redisplay the form.
+            // If there is a fail, redisplay the form with the relevand model errors
             return View("Register",model);
         }
 
@@ -121,32 +115,33 @@ namespace OnlineMarkerCW.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LoginViewModel model, string returnUrl = null)
         {
+            //save redirect data in the view, so that it can preserved for the next post request if the first one fails
             ViewData["ReturnUrl"] = returnUrl;
             if (ModelState.IsValid)
             {
-                //
+                //sing in the user using the ViewModel data, if is is uscesfull move Home or to the redirect URL
                 var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, false, lockoutOnFailure: false);
                 if (result.Succeeded)
                 {
-                    //dont use session, use claims, claims store the information under the cookie rather than database, hence work as same way as session
-                    _logger.LogInformation(1, "User logged in and stulst is {result}", result);
+                    //Check if there is a redirect data passed, if so, Redirect
                     if (Url.IsLocalUrl(returnUrl))
                       {
                         _logger.LogInformation(1, "redirec to  {returnUrl}", returnUrl);
                         return Redirect(returnUrl);
                       }
+                      //Redirect home
                       return RedirectToAction(nameof(HomeController.Index), "Home");
 
 
                 }
                 else
                 {
+                    //Add error to the modelstaet if attempt not  susscesfull
                     ModelState.AddModelError(string.Empty, "Invalid login attempt.");
-                    return View("Login", model);
                 }
             }
 
-            //if modelstate is wrong, make sure it is dumped out.
+            //if something wrong, redisplay the page and dump the modelstate errors
             return View("Login", model);
         }
 
@@ -156,12 +151,13 @@ namespace OnlineMarkerCW.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()
         {
+            //sign out the user out of the system
             await _signInManager.SignOutAsync();
-            _logger.LogInformation(4, "User logged out.");
-            //HttpContext.Session.Abandon();
+            //Redirect user to the login page
             return RedirectToAction(nameof(AccountController.Login), "Account");
         }
 
+        //Redirerect to the 403 page if access Denied
         public IActionResult AccessDenied()
         {
           return Redirect("/Error_Message/403");

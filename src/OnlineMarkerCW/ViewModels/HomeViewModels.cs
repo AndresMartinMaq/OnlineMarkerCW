@@ -4,7 +4,8 @@ using System.ComponentModel.DataAnnotations;
 
 namespace OnlineMarkerCW.ViewModels
 {
-    public class MyWorksViewModel {
+  //Define a Viewmodel for the File Upload post request and the relevand Validaiton requirements
+  public class MyWorksViewModel {
 
         [Required]
         [DataType(DataType.Upload)]

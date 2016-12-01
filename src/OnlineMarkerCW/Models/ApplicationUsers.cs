@@ -8,7 +8,7 @@ using System.ComponentModel.DataAnnotations;
 namespace OnlineMarkerCW.Models
 {
 
-    // Add profile data for application users by adding properties to the ApplicationUser class
+    // Define the applicaiton User Entity and its parameters
     public class ApplicationUser : IdentityUser
     {
       [Required]

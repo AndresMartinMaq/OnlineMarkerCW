@@ -52,7 +52,7 @@ namespace OnlineMarkerCW.Controllers
       }
 
 
-      //injest the controller with user manager, logger and hosting manger
+      //injec the controller with user manager, logger and hosting manger
       public HomeController(UserManager<ApplicationUser> userManager,ILoggerFactory loggerFactory, IHostingEnvironment hostingEnv, IDbServices dbServices)
       {
           _userManager = userManager;
@@ -65,12 +65,8 @@ namespace OnlineMarkerCW.Controllers
       [Authorize]
       public IActionResult Index()
       {
-        //session example
-        // ViewData["string-from-session"] = HttpContext.Session.GetString("session_mail");
 
-        //Check for the user role example
-        //_userManager.IsInRoleAsync(user,"Student").Result);
-
+          //check for the user role and then redirect to the relevand MyWorks page for Student and MyMarkings page for the teacher.
           if(user_role == "Teacher")
           {
               return RedirectToAction(nameof(HomeController.MyMarkings), "Home");
@@ -85,7 +81,8 @@ namespace OnlineMarkerCW.Controllers
       }
 
       [HttpGet]
-      [Authorize(Roles = "Student")] //you can use authorisation based on the role - quite convient to seperate between teachers and students views
+      [Authorize(Roles = "Student")]
+      //for student only fetch and display his own submitted works
         public async Task<IActionResult> MyWorks() {
           var user = await _userManager.GetUserAsync(this.User);
           var model = await _dbServices.GetSubmitedWorks(user);
@@ -95,23 +92,22 @@ namespace OnlineMarkerCW.Controllers
        [HttpPost]
        [ValidateAntiForgeryToken]
        [Authorize(Roles = "Student")]
-       //Changed the task from async to a synchrounous one, as without using ajax the sucesfull upload message cannot be sent through before the view is generated.
-       //http://dotnetthoughts.net/file-upload-in-asp-net-5-and-mvc-6/
+       //handler for upploading an html file
        public async Task<IActionResult> MyWorks(MyWorksViewModel viewModel)
        {
+         //prearage the file and path where to save it
          var file = viewModel.File;
          DateTime localDate = DateTime.Now;
          string timeNow = localDate.ToString("yyyyMMddHHmmss");
          string upload_string = "html_uploads/"  + user_ID;
          var uploads = Path.Combine(_hostingEnv
            .WebRootPath, upload_string);
-         _logger.LogWarning(0, "uploads is {string}", uploads) ;
          //check if directry exists, if not, create one.
          if (!Directory.Exists(uploads)) {
             Directory.CreateDirectory(uploads);
          }
+         //get the current user
             var user = await _userManager.GetUserAsync(this.User);
-            _logger.LogWarning(0, "I am getting the user") ;
           //check the modelstate
           if (ModelState.IsValid) {
            //check that file is not empty and in the right extension
@@ -130,6 +126,7 @@ namespace OnlineMarkerCW.Controllers
                              await file.CopyToAsync(fileStream);
                              ViewData["upload-message"] = "File upload sucessfull";
                           } catch (Exception ex) {
+                            //if there are any expection, catch the Error messages
                             ModelState.AddModelError("File", "Upload failed: " +ex.Message.ToString());
                           }
                        }
@@ -140,6 +137,7 @@ namespace OnlineMarkerCW.Controllers
                 }
               }
 
+              //get the list of the submitted works by the user and return a view with them
               var model = await _dbServices.GetSubmitedWorks(user);
               return View("MyWorks", model);
        }
@@ -147,23 +145,26 @@ namespace OnlineMarkerCW.Controllers
        [HttpPost]
        [ValidateAntiForgeryToken]
        [Authorize(Roles = "Student")]
+       //this handler hanles the post requeds to delete the work
        public async Task<IActionResult> WorkDelete(int ID)  {
         var work =  await _dbServices.GetWorkWithID(ID);
         var user = await _userManager.GetUserAsync(this.User);
-        //check if owner is sending the request to delete
+        //check if owner is sending the request to delete, if so delete the file physically and from the db
         if (work.Owner == user) {
             _dbServices.RemoveWork(work);
             System.IO.File.Delete(work.FilePath);
         }
+        //redirect ot home
         return RedirectToAction(nameof(HomeController.MyWorks), "Home");
       }
 
        [Authorize]
        [HttpGet]
        public async Task<IActionResult> WorkView(int ID)  {
+         //fetch the work requested  and current user
         var work = await _dbServices.GetWorkWithID(ID);
         var user = await _userManager.GetUserAsync(this.User);
-        //check if owner or teacher tries to access the page
+        //check if owner or teacher tries to access the page. If he is return the WorkView, if not rerired to access denied page.
         if (work?.Owner == user || user_role == "Teacher") {
            return View("WorkView",work);
         } else {
@@ -233,13 +234,16 @@ namespace OnlineMarkerCW.Controllers
           [HttpGet]
           [Route("/Error_Message/{code}")]
           public IActionResult Error_Message(int code) {
+            //if 403 return access denied page
           if (code == 403 ) {
             ViewData["Message"] = "You are not allowed to access this page, please try another one.";
             ViewData["Tittle"] = "403 Access Denied";
         } else if ( code == 404) {
+          //if page not found, return 404
             ViewData["Message"] = "Page not found.";
             ViewData["Title"] = "404 Not Found";
         } else {
+          //if any otehr code, return the code
           ViewData["Title"] = code.ToString();
           ViewData["Message"] = code.ToString();
         }
