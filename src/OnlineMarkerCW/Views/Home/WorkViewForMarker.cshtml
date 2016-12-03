@@ -78,7 +78,7 @@
     <div class="col-md-8">
         @Html.AntiForgeryToken()
         <h3>Feedback</h3>
-        <textarea class="larger" form="gradingForm" name="feedback" rows="4" maxlength="200"">
+        <textarea class="larger" form="gradingForm" name="feedback" rows="4" maxlength="200">
         @if (ViewData.ContainsKey("input-feedback-preservation")) {
             @ViewData["input-feedback-preservation"]
         } else {
