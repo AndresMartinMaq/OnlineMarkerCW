@@ -66,20 +66,18 @@ namespace OnlineMarkerCW.UnitTests.Controllers
         [InlineData("Teacher")]
         public void GET_Index_RedirectsAccordingToRole(String role)
         {
-
             // --Arrange--
             var userClaims = getClaims("1", "Stuart", "Dent", "some@email.com", role);
             var contexts = getsContexts(userClaims);
             //Set home controller to use mock context
             controller.ControllerContext = contexts.controllerContext;
-
             //Force use of ActionExectuing Context.
             controller.OnActionExecuting(contexts.actionExecutingContext);
 
-            // Act
+            // --Act--
             var result = controller.Index();
 
-            // Assert
+            // --Assert--
             var redirectToActionResult = Assert.IsType<RedirectToActionResult>(result);
             Assert.Equal("Home", redirectToActionResult.ControllerName);
             //Should redirect to MyWorks if student, MyMarkings if Teacher.

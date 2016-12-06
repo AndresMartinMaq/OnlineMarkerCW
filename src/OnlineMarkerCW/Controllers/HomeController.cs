@@ -11,17 +11,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Headers;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using OnlineMarkerCW.Models;
 using OnlineMarkerCW.ViewModels;
 using Microsoft.AspNetCore.Hosting;
-using OnlineMarkerCW.Data;
-using Microsoft.EntityFrameworkCore;
-using OnlineMarkerCW.Services;
 using OnlineMarkerCW.Interfaces;
 
 namespace OnlineMarkerCW.Controllers
