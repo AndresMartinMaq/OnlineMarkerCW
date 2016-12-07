@@ -64,4 +64,7 @@
 ###############################################################################
 # For githubs liguist
 ###############################################################################
-src/OnlineMarkerCW/wwwroot/lib/* linguist-documentation
+src/OnlineMarkerCW/wwwroot/lib/* linguist-vendored
+/src/OnlineMarkerCW/wwwroot/lib/* linguist-vendored
+src/OnlineMarkerCW/wwwroot/lib/ linguist-vendored
+/src/OnlineMarkerCW/wwwroot/lib/ linguist-vendored
